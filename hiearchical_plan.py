@@ -1,4 +1,3 @@
-from re import L
 import numpy as np
 from neighbourhood import Neighbourhood
 from main import a_subset_b

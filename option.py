@@ -1,3 +1,4 @@
+from os import stat_result
 import numpy as np
 
 class Option():
@@ -20,6 +21,40 @@ class Option():
             action = "still"
         # Return action number, used for intra-option model learning
         return action, action_number
+
+    def execute_policy(self, S): #starting at position S, returns the state obtained after executing option policy
+        pos = np.where(S == 1)
+        while self.beta[pos] == 0:
+            action = self.pi[pos][0]
+            if action == 1:
+                x = pos[0][0]
+                y = pos[1][0] - 1
+            elif action == 2:
+                x = pos[0][0] - 1
+                y = pos[1][0]
+            elif action == 3:
+                x = pos[0][0]
+                y = pos[1][0] + 1
+            elif action == 4:
+                x = pos[0][0] + 1
+                y = pos[1][0]
+            pos = ([x], [y])
+        final_state = np.zeros((8, 8))
+        final_state[pos] = 1
+        return final_state
+
+    def list_initiation_states(self): #Split a set of states into a list of stat_result
+        states = []
+        for i in range(8):
+            for j in range(8):
+                if self.I[i][j] == 1:
+                    arr = np.zeros((8, 8))
+                    arr[i][j] = 1
+                    states.append(arr)
+        return states
+
+
+
                
     def _setIBetaPi(self):
         self.I = np.zeros((8, 8))
@@ -319,7 +354,7 @@ class Option():
         return self.name
 
 if __name__ == "__main__":
-    option = Option("room_4->room_3")
+    option = Option("room_1->room_2")
     print (option.name)
     print("Initiation Set")
     print(option.I)
@@ -327,3 +362,6 @@ if __name__ == "__main__":
     print(option.beta)
     print("Pi")
     print(option.pi)
+    arr = np.zeros((8, 8))
+    arr[1, 0] = 1
+    print(option.execute_policy(arr))
