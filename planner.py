@@ -34,7 +34,8 @@ class Planner():
                     
                     term_state = option.execute_policy(state)
                     if self.to_tuple(term_state) not in reached:
-                        sucessors.append([term_state, option, state])
+                        #sucessors.append([term_state, option, state])
+                        sucessors.append([option, state, term_state])
                         reached.append(self.to_tuple(term_state))
         return sucessors
 
@@ -54,20 +55,20 @@ class Planner():
         reached = [self.to_tuple(S)]
         frontier = queue.Queue() 
         
-        parents = {self.to_tuple(S):None} #parents format -> state:[previous_state, option used]
+        parents = {self.to_tuple(S):None} #parents format -> state:[previous_state, option used, state from which option executed]
         frontier.put(S)
         while (not frontier.empty()):
             state = frontier.get()
             for i in self.get_sucessors(state):
-                state_to_tup = self.to_tuple(i[0])
-                if a_subset_b(i[0], self.N(G)):
-                    parents[self.to_tuple(i[0])] = [state, i[1], i[2]]
-                    return True, self.extract_plan(i[0], parents)
+                state_to_tup = self.to_tuple(i[2])
+                if a_subset_b(i[2], self.N(G)):
+                    parents[self.to_tuple(i[2])] = [state, i[0], i[1]]
+                    return True, self.extract_plan(i[2], parents)
                     
                 elif state_to_tup not in reached:
                     reached.append(state_to_tup)
-                    parents[self.to_tuple(i[0])] = [state, i[1], i[2]]
-                    frontier.put(i[0])
+                    parents[self.to_tuple(i[2])] = [state, i[0], i[1]]
+                    frontier.put(i[2])
         return False, []
 
 if __name__ == "__main__":

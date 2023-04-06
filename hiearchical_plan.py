@@ -35,17 +35,11 @@ class Hierarchical_plan():
 
         # no plan_match needed atm as there are no state abstractions currently
         N = self.neighbourhood_function(i)
-        # if i == 1:
-        #     print(N(G))
         options = self.options(i)
         planner = Planner(options, N)
         if a_subset_b(S, N(G)):
             return self.hierarchical_plan(S, G, i-1)
         result, plan = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
-        # print(plan)
-        # if i == 1:
-        #     print("PLAN: ", plan)
-        #     print("goal neighbourhood: ", N(G))
         # format of plan is [start_state, option]
         plan_len = len(plan)
         # the plan should be a sequence of options
@@ -66,9 +60,6 @@ class Hierarchical_plan():
             I = plan[index + 1][0]
             if not a_subset_b(beta, I):
                 result, sub_plan = self.hierarchical_plan(beta, I, i - 1)
-                # if i ==2:
-                #     print("this is the subplan")
-                #     print(len(sub_plan), sub_plan[0][1].name)
                 if result == False:
                     # print(beta, I)
                     return False, []
@@ -91,12 +82,12 @@ class Hierarchical_plan():
 
 if __name__ == "__main__":
     hp_planner = Hierarchical_plan()
-
     arr1 = np.zeros((8, 8))
-    arr1[0, 0] = 1
+    arr1[0, 0] = 1 #set start state
     arr2 = np.zeros((8, 8))
-    arr2[6, 7] = 1
+    arr2[6, 7] = 1 #set goal state
     plan = hp_planner.hierarchical_plan(arr1, arr2, 2)
     for i in plan[1]:
         print(i[0])
         print(i[1].name)
+    print(arr2)
