@@ -33,7 +33,15 @@ mdp_2 = [
         Option("room_4->room_2"), Option("room_4->room_3"),
     ]
 
-mdp_0 = []
+mdp_0_placeholder = []
+
+directions = ["left","right","up","down"]
+for i in range(8):
+    for j in range (8):
+        for direction in directions:
+            mdp_0_placeholder.append(Action((i,j),direction))
+
+mdp_0 = mdp_0_placeholder
 
 #####################
 
@@ -67,11 +75,7 @@ def plan_match(start,goal, mdp):
 def main():
     
 
-    directions = ["left","right","up","down"]
-    for i in range(8):
-        for j in range (8):
-            for direction in directions:
-                mdp_0.append(Action((i,j),direction))
+    
 
     # quick example of plan matching with different MDP levels
     start = np.zeros((8,8))
