@@ -43,9 +43,11 @@ class Hierarchical_plan():
         # format of plan is [start_state, option]
         plan_len = len(plan)
         # the plan should be a sequence of options
-        if not result:
+        if not result: # drop to a lower level
             return self.hierarchical_plan(S, G, i-1)
         # TO-DO: ADD IS PLAN EFFECTIVE
+
+
         #stitching the gaps
         index = 0
         if not a_subset_b(S, plan[0][0]): #stitching gap at start
@@ -83,10 +85,10 @@ class Hierarchical_plan():
 if __name__ == "__main__":
     hp_planner = Hierarchical_plan()
     arr1 = np.zeros((8, 8))
-    arr1[0, 0] = 1 #set start state
+    arr1[1, 1] = 1 #set start state
     arr2 = np.zeros((8, 8))
-    arr2[6, 7] = 1 #set goal state
-    plan = hp_planner.hierarchical_plan(arr1, arr2, 2)
+    arr2[7, 7] = 1 #set goal state
+    plan = hp_planner.hierarchical_plan(arr1, arr2, 1)
     for i in plan[1]:
         print(i[0])
         print(i[1].name)

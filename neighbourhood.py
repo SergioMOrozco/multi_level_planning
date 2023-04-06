@@ -1,6 +1,7 @@
 import numpy as np
 from main import a_subset_b, mdp_1
 
+#implementation of naive neighbourhood
 class Neighbourhood():
     def __init__(self):
         #memoize previously computed neighbourhoods
@@ -31,7 +32,6 @@ class Neighbourhood():
 
     def N1(self, S): 
         #for the neighbourhood on the 1st level, we only want to add the states that are one primitive action away, 
-        #this function does that
         if S.tobytes() in self.N1_store:
             return self.N1_store[S.tobytes()]
         N = np.array([[0 for _ in range(8)] for _ in range(8)])
@@ -49,7 +49,7 @@ class Neighbourhood():
             return self.N2_store[S.tobytes()]
         S1 = self.N1(S)
         f1 = self.f(mdp_1, S)
-        N = self.union(S1, f1)
+        N = self.union(S1, f1) #from definition in the handout
         self.N2_store[S.tobytes()] = N
         return N
 

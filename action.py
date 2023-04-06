@@ -22,6 +22,7 @@ class Action():
         return action, action_number
 
     def execute_policy(self, S): #starting at position S, returns the state obtained after executing option policy
+        #not necessary for primitive actions, included so that they can be handled identically to options in options.py
         pos = np.where(S == 1)
         while self.beta[pos] == 0:
             action = self.pi[pos][0]

@@ -23,6 +23,7 @@ class Option():
         return action, action_number
 
     def execute_policy(self, S): #starting at position S, returns the state obtained after executing option policy
+        # NOTE: we don't want to actually execute policies while planning, this is just a cheap patch to avoid partitioning the options in main.py by hand
         pos = np.where(S == 1)
         while self.beta[pos] == 0:
             action = self.pi[pos][0]

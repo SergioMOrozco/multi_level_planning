@@ -14,17 +14,18 @@ class Planner():
         # print(N(arr1))
 
 
-    def extract_plan(self, state, parents):
+    def extract_plan(self, state, parents): #backtrack using parents and return the plan
+        # 
         route = []
         state = self.to_tuple(state)
         while parents[state] != None:
             prev_option_term_state, option, option_start_state = parents[state]
             route = [(option_start_state, option)] + route
             state = self.to_tuple(prev_option_term_state)
-        return route
+        return route #format: [state from which option executed, option]
 
     # termination conditions are an OR, which makes neighbourhoods an intersection rather than subset
-    def get_sucessors(self, S): #format: [sucessor, option]
+    def get_sucessors(self, S): #format: [option, option_start_state, option_termination_state]
         sucessors = []
         reached = []
         for option in self.options:
@@ -34,6 +35,7 @@ class Planner():
                     
                     term_state = option.execute_policy(state)
                     if self.to_tuple(term_state) not in reached:
+                        #state is in the neighbourhood of S, option is executed from state to term_state. The gap between S and state will be stitched on lower levels
                         #sucessors.append([term_state, option, state])
                         sucessors.append([option, state, term_state])
                         reached.append(self.to_tuple(term_state))
