@@ -11,9 +11,6 @@ class Planner():
         self.options = options
         self.N = N
         self.stitches_store = {}
-        # arr1 = np.zeros((8, 8))
-        # arr1[1, 0] = 1
-        # print(N(arr1))
 
     def count_stitches(self, state, parents): #count the number of gaps needing to be stiched on the path to state
         state = self.to_tuple(state)
@@ -50,14 +47,10 @@ class Planner():
             if not np.array_equal(prev_option_term_state, option_start_state):
                 num_gaps += 1
             state = self.to_tuple(prev_option_term_state)
-        # print("term state \n", state)
-        # if plan_len == 1:
-        #     print("BLAH \n:",  pretty_print_plan(self.extract_plan(state1, parents)))
         return [plan_len, num_gaps]
 
 
-    def extract_plan(self, state, parents): #backtrack using parents and return the plan
-        # 
+    def extract_plan(self, state, parents): #backtrack using parents and return the plan 
         route = []
         state = self.to_tuple(state)
         while parents[state] != None:
@@ -74,14 +67,10 @@ class Planner():
             for state in option.list_initiation_states():
                 
                 if a_subset_b(S, self.N(state)):
-                    # if option.name == "room_2_quad_3->room_2_quad_4":
-                    #     print("HERE:", S)
-                    
                     term_state = option.execute_policy(state)
                     #REDUNDANCY HERE
                     #if self.to_tuple(term_state) not in reached:
                     #state is in the neighbourhood of S, option is executed from state to term_state. The gap between S and state will be stitched on lower levels
-                    #sucessors.append([term_state, option, state])
                     sucessors.append([option, state, term_state])
                     reached.append(self.to_tuple(term_state))
         return sucessors
@@ -90,13 +79,6 @@ class Planner():
         return tuple(map(tuple, S))
 
     def bfs_plan(self, S, G):
-        """
-        Implement breadth-first search.
-        Input:
-            problem - the problem on which the search is conducted, a SearchProblem
-        Output: a list of states representing the path of the solution
-        """
-
         if a_subset_b(S, self.N(G)):
             return True, []
         reached = [self.to_tuple(S)]
@@ -110,7 +92,7 @@ class Planner():
         frontier1.put(S)
         epoch = 0
         while (True):
-            print("EPOCH:", epoch)
+            # print("EPOCH:", epoch)
             epoch += 1
             if frontier1.empty():
                 if goal_reached:
@@ -137,24 +119,7 @@ class Planner():
                     if new_efficiency <= cur_efficiency:
                         term_state = i[2]
                         parents[state_to_tup] = [state, i[0], i[1]]
-                        cur_efficiency = new_efficiency
-
-
-
-                    # if self.to_tuple(i[2]) in parents:
-                    #     old_parent  = parents[self.to_tuple(i[2])]
-                    # else:
-                    #     old_parent = None
-                    # parents[self.to_tuple(i[2])] = [state, i[0], i[1]]
-                    # new_efficiency = self.extract_plan_efficiency(i[2], parents)
-                    # if new_efficiency <= cur_efficiency:
-                    #     term_state = i[2]
-                    #     print("eff:" , new_efficiency)
-                    #     cur_efficiency = new_efficiency
-                    # else:
-                    #     parents[self.to_tuple(i[2])] = old_parent
-                    
-                #need to fix this              
+                        cur_efficiency = new_efficiency             
                 elif state_to_tup not in (reached + reached_in_epoch) or (state_to_tup in reached_in_epoch and self.count_stitches(state_to_tup, parents) > stitches_to_i_new):
                     reached_in_epoch.append(state_to_tup)
                     parents[state_to_tup] = [state, i[0], i[1]]

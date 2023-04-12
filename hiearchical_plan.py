@@ -88,18 +88,37 @@ def unit_tests():
     arr1 = np.zeros((8, 8))
     arr1[1, 1] = 1 #set start state
     arr2 = np.zeros((8, 8))
-    arr2[7, 7] = 1 #set goal state
-    plan = hp_planner.hierarchical_plan(arr1, arr2, 1)
+    arr2[2, 4] = 1 #set goal state
+    correct_plan = ["room_1_quad_1->room_1_quad_2", "1_2_right", "room_1_quad_2->room_1_quad_4", "2_3_right"]
+    plan = [i[1].name for i in hp_planner.hierarchical_plan(arr1, arr2, 1)[1]]
+    if plan == correct_plan:
+        print("PASS")
+    else:
+        print("FAIL")
+    arr1 = np.zeros((8, 8))
+    arr1[3, 3] = 1 #set start state
+    arr2 = np.zeros((8, 8))
+    arr2[5, 3] = 1 #set goal state
+    correct_plan = ["room_1->room_3", "4_3_down"]
+    plan = [i[1].name for i in hp_planner.hierarchical_plan(arr1, arr2, 2)[1]]
+  
+    if plan == correct_plan:
+        print("PASS")
+    else:
+        print("FAIL")
+    
+
 
 
 if __name__ == "__main__":
-    hp_planner = Hierarchical_plan()
-    arr1 = np.zeros((8, 8))
-    arr1[1, 1] = 1 #set start state
-    arr2 = np.zeros((8, 8))
-    arr2[2, 4] = 1 #set goal state
-    plan = hp_planner.hierarchical_plan(arr1, arr2, 1)
-    for i in plan[1]:
-        print(i[0])
-        print(i[1].name)
-    print(arr2)
+    # hp_planner = Hierarchical_plan()
+    # arr1 = np.zeros((8, 8))
+    # arr1[3, 3] = 1 #set start state
+    # arr2 = np.zeros((8, 8))
+    # arr2[5, 3] = 1 #set goal state
+    # plan = hp_planner.hierarchical_plan(arr1, arr2, 2)
+    # for i in plan[1]:
+    #     print(i[0])
+    #     print(i[1].name)
+    # print(arr2)
+    unit_tests()
