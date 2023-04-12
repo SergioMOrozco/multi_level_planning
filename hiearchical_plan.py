@@ -82,12 +82,22 @@ class Hierarchical_plan():
                 plan =  plan + sub_plan
         return True, plan
 
-if __name__ == "__main__":
+
+def unit_tests():
     hp_planner = Hierarchical_plan()
     arr1 = np.zeros((8, 8))
     arr1[1, 1] = 1 #set start state
     arr2 = np.zeros((8, 8))
     arr2[7, 7] = 1 #set goal state
+    plan = hp_planner.hierarchical_plan(arr1, arr2, 1)
+
+
+if __name__ == "__main__":
+    hp_planner = Hierarchical_plan()
+    arr1 = np.zeros((8, 8))
+    arr1[1, 1] = 1 #set start state
+    arr2 = np.zeros((8, 8))
+    arr2[2, 4] = 1 #set goal state
     plan = hp_planner.hierarchical_plan(arr1, arr2, 1)
     for i in plan[1]:
         print(i[0])
