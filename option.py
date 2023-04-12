@@ -2,10 +2,15 @@ from os import stat_result
 import numpy as np
 
 class Option():
-    def __init__(self, option):
+    def __init__(self, option, I = None, beta = None, pi = None):
         self.name = option
         # Set I (initiation set), beta (termination set), pi (policy) 
-        self._setIBetaPi()
+        if I is not None:
+            self.I = I
+            self.beta = beta
+            self.pi = pi
+        else:
+            self._setIBetaPi()
         
     def pickAction(self, state):
         action_number = self.pi[state]
@@ -25,6 +30,9 @@ class Option():
     def execute_policy(self, S): #starting at position S, returns the state obtained after executing option policy
         # NOTE: we don't want to actually execute policies while planning, this is just a cheap patch to avoid partitioning the options in main.py by hand
         pos = np.where(S == 1)
+        # print("pos: ", pos)
+        # print(self.beta)
+        #print(self.name)
         while self.beta[pos] == 0:
             action = self.pi[pos][0]
             if action == 1:

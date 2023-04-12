@@ -29,26 +29,6 @@ class Planner():
             self.stitches_store[state] = num_stitches_to_parent + 1
         return self.stitches_store[state]
 
-        
-        
-
-
-    def extract_plan_efficiency(self, state, parents): # returns [plan length, number of gaps stitched]
-        # state:[previous_state, option used, state from which option executed]
-        state1 = state
-        plan_len = 0
-        num_gaps = 0
-        state = self.to_tuple(state)
-        if state not in parents:
-            return [math.inf, math.inf]
-        while parents[state] != None:
-            prev_option_term_state, option, option_start_state = parents[state]
-            plan_len += 1
-            if not np.array_equal(prev_option_term_state, option_start_state):
-                num_gaps += 1
-            state = self.to_tuple(prev_option_term_state)
-        return [plan_len, num_gaps]
-
 
     def extract_plan(self, state, parents): #backtrack using parents and return the plan 
         route = []
@@ -64,15 +44,16 @@ class Planner():
         sucessors = []
         reached = []
         for option in self.options:
-            for state in option.list_initiation_states():
+            # for state in option.list_initiation_states():
+            state = option.I
                 
-                if a_subset_b(S, self.N(state)):
-                    term_state = option.execute_policy(state)
-                    #REDUNDANCY HERE
-                    #if self.to_tuple(term_state) not in reached:
-                    #state is in the neighbourhood of S, option is executed from state to term_state. The gap between S and state will be stitched on lower levels
-                    sucessors.append([option, state, term_state])
-                    reached.append(self.to_tuple(term_state))
+            if a_subset_b(S, self.N(state)):
+                term_state = option.beta
+                #REDUNDANCY HERE
+                #if self.to_tuple(term_state) not in reached:
+                #state is in the neighbourhood of S, option is executed from state to term_state. The gap between S and state will be stitched on lower levels
+                sucessors.append([option, state, term_state])
+                reached.append(self.to_tuple(term_state))
         return sucessors
 
     def to_tuple(self, S):

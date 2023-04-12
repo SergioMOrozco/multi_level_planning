@@ -58,7 +58,7 @@ class Hierarchical_plan():
                 plan = sub_plan + plan
                 index += len(sub_plan)
         for x in range(plan_len - 1): #stitching intermediate gaps
-            beta = plan[index][1].execute_policy(plan[index][0])
+            beta = plan[index][1].beta
             I = plan[index + 1][0]
             if not a_subset_b(beta, I):
                 result, sub_plan = self.hierarchical_plan(beta, I, i - 1)
@@ -71,7 +71,7 @@ class Hierarchical_plan():
             else:
                 index += 1
         #stitching gap at end
-        beta = plan[-1][1].execute_policy(plan[-1][0])
+        beta = plan[-1][1].beta
         if not a_subset_b(beta, G): 
             result, sub_plan = self.hierarchical_plan(beta, G, i - 1)
             # if i == 2:
