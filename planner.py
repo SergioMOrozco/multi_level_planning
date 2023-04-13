@@ -10,7 +10,7 @@ class Planner():
     def __init__(self, options, N):
         self.options = options
         self.N = N
-        self.stitches_store = {}
+        self.stitches_store = {} #used to memoise previously computed values in count_stitches
 
     def count_stitches(self, state, parents): #count the number of gaps needing to be stiched on the path to state
         state = self.to_tuple(state)
@@ -23,7 +23,7 @@ class Planner():
             return self.stitches_store[state]
         prev_option_term_state, option, option_start_state = parents[state]
         num_stitches_to_parent = self.count_stitches(prev_option_term_state, parents)
-        if np.array_equal(prev_option_term_state, option_start_state):
+        if a_subset_b(prev_option_term_state, option_start_state):
             self.stitches_store[state] = num_stitches_to_parent
         else:
             self.stitches_store[state] = num_stitches_to_parent + 1
@@ -39,14 +39,13 @@ class Planner():
             state = self.to_tuple(prev_option_term_state)
         return route #format: [state from which option executed, option]
 
-    # termination conditions are an OR, which makes neighbourhoods an intersection rather than subset
+    # note to self: termination conditions are an OR, which makes neighbourhoods an intersection rather than subset
     def get_sucessors(self, S): #format: [option, option_start_state, option_termination_state]
         sucessors = []
         reached = []
         for option in self.options:
             # for state in option.list_initiation_states():
-            state = option.I
-                
+            state = option.I        
             if a_subset_b(S, self.N(state)):
                 term_state = option.beta
                 #REDUNDANCY HERE
@@ -90,7 +89,7 @@ class Planner():
             #print(self.get_sucessors(state))
             for i in self.get_sucessors(state):
                 state_to_tup = self.to_tuple(i[2])
-                stitches_to_i_new = stitches_to_state + (not np.array_equal(state, i[1]))
+                stitches_to_i_new = stitches_to_state + (not a_subset_b(state, i[1]))
                 # if state_to_tup[1][2] == 1:
                 #     print("the i1: ", i[1], stitches_to_state, stitches_to_i_new)
                 

@@ -114,10 +114,11 @@ def plan_match(start,goal, mdp):
 
 def main():
     print("hello")
+    print([i.beta for i in mdp_0])
 
     
-    for option in mdp_2:
-        print(option.name, option.I, option.beta, sep='\n')
+    # for option in mdp_2:
+    #     print(option.name, option.I, option.beta, sep='\n')
     # # quick example of plan matching with different MDP levels
     # start = np.zeros((8,8))
     # goal = np.zeros((8,8))

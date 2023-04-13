@@ -6,7 +6,7 @@ from planner import Planner
 
 class Hierarchical_plan():
     def __init__(self):
-        self.neighbourhood = Neighbourhood()
+        self.neighbourhood = Neighbourhood("naive", 4, 2, 1)
 
     def neighbourhood_function(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
         if i == 0:
@@ -111,14 +111,14 @@ def unit_tests():
 
 
 if __name__ == "__main__":
-    # hp_planner = Hierarchical_plan()
-    # arr1 = np.zeros((8, 8))
-    # arr1[3, 3] = 1 #set start state
-    # arr2 = np.zeros((8, 8))
-    # arr2[5, 3] = 1 #set goal state
-    # plan = hp_planner.hierarchical_plan(arr1, arr2, 2)
-    # for i in plan[1]:
-    #     print(i[0])
-    #     print(i[1].name)
-    # print(arr2)
+    hp_planner = Hierarchical_plan()
+    arr1 = np.zeros((8, 8))
+    arr1[1, 1] = 1 #set start state
+    arr2 = np.zeros((8, 8))
+    arr2[7, 7] = 1 #set goal state
+    plan = hp_planner.hierarchical_plan(arr1, arr2, 2)
+    for i in plan[1]:
+        print(i[0])
+        print(i[1].name)
+    print(arr2)
     unit_tests()
