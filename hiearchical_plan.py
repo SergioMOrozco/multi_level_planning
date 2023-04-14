@@ -1,11 +1,12 @@
 import numpy as np
 import utils
 import random
+import time
 from option import Option
 from action import Action 
 from neighbourhood import Neighbourhood
 from utils import matrix_to_list
-from main import a_subset_b, mdp_2, mdp_1, mdp_0
+from main import a_subset_b, mdp_2, mdp_1, mdp_0, mdp_2_p, mdp_1_p
 from planner import Planner
 from planner_intersection import PlannerIntersection
 
@@ -24,12 +25,16 @@ class Hierarchical_plan():
         else:
             print("ERROR")
     
-    def options(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
+    def options(self, i, probabilistic = False): #r eturns the neighbourhood_function for the ith level of abstraction
         if i == 0:
             return mdp_0
         elif i == 1:
+            if probabilistic:
+                return mdp_1_p
             return mdp_1
         elif i == 2:
+            if probabilistic:
+                return mdp_2_p
             return mdp_2
         else:
             print("ERROR")
@@ -60,6 +65,7 @@ class Hierarchical_plan():
         if not a_subset_b(S, plan[0][0]): #stitching gap at start
             result, sub_plan = self.hierarchical_plan(S, plan[0][0], i - 1)
             if result == False:
+                print("FAILURE")
                 return False, []
             else:
                 plan = sub_plan + plan
@@ -70,6 +76,7 @@ class Hierarchical_plan():
             if not a_subset_b(beta, I):
                 result, sub_plan = self.hierarchical_plan(beta, I, i - 1)
                 if result == False:
+                    print("FAILURE")
                     # print(beta, I)
                     return False, []
                 else:
@@ -84,6 +91,7 @@ class Hierarchical_plan():
             # if i == 2:
             #     print(sub_plan)
             if result == False:
+                print("FAILURE")
                 return False, []
             else:
                 plan =  plan + sub_plan
@@ -102,9 +110,8 @@ class Hierarchical_plan():
         g_as_list = matrix_to_list(G)
 
         #TODO: add planmatch
-        options = self.options(i)
+        options = self.options(i,True)
         planner = PlannerIntersection(options, N)
-        #planner = Planner(options, N)
         if utils.a_subset_b(start_as_list, modified_g_as_list):
             return True,[]
         if utils.a_subset_b(start_as_list, modified_g_as_list):
@@ -196,7 +203,6 @@ class Hierarchical_plan():
 
         return True, plan
 
-
 def unit_tests():
     hp_planner = Hierarchical_plan()
     arr1 = np.zeros((8, 8))
@@ -234,14 +240,11 @@ def execute_plan(plan, start, goal):
         elif utils.a_subset_b(matrix_to_list(current),sub.initiation_as_list):
             current = sub.execute_policy_probabilistic(current)
             print(sub.name)
-            print(current)
+            #print(current)
     return current
 
 
-
-
 if __name__ == "__main__":
-    hp_planner = Hierarchical_plan()
 
     arr1 = np.zeros((8,8))
     arr1[0, 0] = 1 #set start state
@@ -251,11 +254,52 @@ if __name__ == "__main__":
     # arr2[6, 7] = 1 #set goal state
     # arr2[7, 7] = 1 #set goal state
     arr2[6, 6] = 1 #set goal state
-    plan = hp_planner.hierarchical_plan_probabilistic(arr1, arr2, 2)
 
-    print("Printing Plan:")
-    print("START")
-    print(arr1)
-    print("GOAL")
-    print(arr2)
+    print("==============================")
+    print ("Deterministic Planning Time")
+    hp_planner = Hierarchical_plan()
+    start_time = time.time()
+    plan = hp_planner.hierarchical_plan(arr1, arr2, 2)
+    end_time = time.time()
+
+    for o in plan[1]:
+        print(o[1].name)
+
+    elapsed_time = end_time - start_time
+
+    print(elapsed_time)
+    print("==============================")
+
+    print ("Stochastic Planning Time")
+    hp_planner_stochastic = Hierarchical_plan()
+    start_time = time.time()
+    plan = hp_planner_stochastic.hierarchical_plan_probabilistic(arr1, arr2, 2)
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+
     execute_plan(plan[1],arr1,arr2)
+
+    print(elapsed_time)
+    print("==============================")
+
+    print ("Lowest Level Planning Time")
+    hp_planner_low= Hierarchical_plan()
+    start_time = time.time()
+    plan = hp_planner_low.hierarchical_plan(arr1, arr2, 0)
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+
+    for o in plan[1]:
+        print(o[1].name)
+
+    print(elapsed_time)
+    print("==============================")
+
+    # print("Printing Plan:")
+    # print("START")
+    # print(arr1)
+    # print("GOAL")
+    # print(arr2)
+    #execute_plan(plan[1],arr1,arr2)
