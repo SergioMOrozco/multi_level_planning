@@ -70,8 +70,8 @@ mdp_2 = [
         Option("room_4->room_2"), Option("room_4->room_3"),
     ]
 
-mdp_1 = partition_mdp(mdp_1)
-mdp_2 = partition_mdp(mdp_2)
+#mdp_1 = partition_mdp(mdp_1)
+#mdp_2 = partition_mdp(mdp_2)
 
 mdp_0_placeholder = []
 
@@ -81,6 +81,7 @@ for i in range(8):
         for direction in directions:
             mdp_0_placeholder.append(Action((i,j),direction))
 
+# not sure what this is
 mdp_0 = mdp_0_placeholder
 
 #####################
