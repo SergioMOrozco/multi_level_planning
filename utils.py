@@ -8,24 +8,23 @@ def a_subset_b(a,b):
     return True
 def a_intersects_b(a,b):
     for i in a:
-        # need to know how much of an intersection
+        # TODO: need to know how much of an intersection
         if i in b:
             return True
     return False
 
 def matrix_to_list(matrix):
-    states = []
-    for i in range(len(matrix)):
-        for j in range(len(matrix[0])):
-            if matrix[i][j] == 1:
-                states.append([i,j])
-    return states
+
+    states = np.argwhere(matrix == 1)
+
+    return states.tolist()
 
 def construct_graph(options):
     graph = {}
     for a in options:
         for b in options:
-            if a_intersects_b(a.termination_as_list,b.initiation_as_list):
+            #if a_intersects_b(a.termination_as_list,b.initiation_as_list):
+            if a_subset_b(a.termination_as_list,b.initiation_as_list):
                 if not a.name in graph.keys():
                     graph[a.name] = []
                 graph[a.name].append(b)

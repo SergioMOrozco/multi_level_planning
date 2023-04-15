@@ -34,8 +34,14 @@ def partition_mdp(mdp): #split the option to obey the subgoal condidion, i.e. al
                 termination_to_initiation[tup] = union(termination_to_initiation[tup], i)
             else:
                 termination_to_initiation[tup] = np.array(i)
+
+        i = 0
         for term_state in termination_to_initiation:
-            new_mdp.append(Option(option.name, termination_to_initiation[term_state], np.array(term_state), option.pi))
+            o = Option(option.name, termination_to_initiation[term_state], np.array(term_state), option.pi)
+            o.name = option.name + "_" + str(i)
+            new_mdp.append(o)
+            i +=1
+
     return new_mdp
 
 def make_mdp_1():
@@ -79,6 +85,7 @@ mdp_2_p = make_mdp_2()
 mdp_1 = partition_mdp(mdp_1)
 mdp_2 = partition_mdp(mdp_2)
 
+
 mdp_0_placeholder = []
 
 directions = ["left","right","up","down"]
@@ -121,7 +128,7 @@ def plan_match(start,goal, mdp):
 
 def main():
     print("hello")
-    print([i.beta for i in mdp_0])
+    print(mdp_1[0].termination_as_list)
 
     
     # for option in mdp_2:

@@ -12,8 +12,9 @@ from planner_intersection import PlannerIntersection
 
 
 class Hierarchical_plan():
-    def __init__(self):
+    def __init__(self, probabilistic = False):
         self.neighbourhood = Neighbourhood("naive", 4, 2, 1)
+        self.probabilistic = probabilistic
 
     def neighbourhood_function(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
         if i == 0:
@@ -25,21 +26,21 @@ class Hierarchical_plan():
         else:
             print("ERROR")
     
-    def options(self, i, probabilistic = False): #r eturns the neighbourhood_function for the ith level of abstraction
+    def options(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
         if i == 0:
             return mdp_0
         elif i == 1:
-            if probabilistic:
+            if self.probabilistic:
                 return mdp_1_p
             return mdp_1
         elif i == 2:
-            if probabilistic:
+            if self.probabilistic:
                 return mdp_2_p
             return mdp_2
         else:
             print("ERROR")
 
-    def hierarchical_plan(self, S, G, i):
+    def hierarchical_plan_v1(self, S, G, i):
 
         if i < 0:
             print("THIS SHOULD NOT HAPPEN")
@@ -50,20 +51,20 @@ class Hierarchical_plan():
         options = self.options(i)
         planner = Planner(options, N)
         if a_subset_b(S, N(G)):
-            return self.hierarchical_plan(S, G, i-1)
+            return self.hierarchical_plan_v1(S, G, i-1)
         result, plan = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
         # format of plan is [start_state, option]
         plan_len = len(plan)
         # the plan should be a sequence of options
         if not result: # drop to a lower level
-            return self.hierarchical_plan(S, G, i-1)
+            return self.hierarchical_plan_v1(S, G, i-1)
         # TO-DO: ADD IS PLAN EFFECTIVE
 
 
         #stitching the gaps
         index = 0
         if not a_subset_b(S, plan[0][0]): #stitching gap at start
-            result, sub_plan = self.hierarchical_plan(S, plan[0][0], i - 1)
+            result, sub_plan = self.hierarchical_plan_v1(S, plan[0][0], i - 1)
             if result == False:
                 print("FAILURE")
                 return False, []
@@ -74,7 +75,7 @@ class Hierarchical_plan():
             beta = plan[index][1].beta
             I = plan[index + 1][0]
             if not a_subset_b(beta, I):
-                result, sub_plan = self.hierarchical_plan(beta, I, i - 1)
+                result, sub_plan = self.hierarchical_plan_v1(beta, I, i - 1)
                 if result == False:
                     print("FAILURE")
                     # print(beta, I)
@@ -87,7 +88,7 @@ class Hierarchical_plan():
         #stitching gap at end
         beta = plan[-1][1].beta
         if not a_subset_b(beta, G): 
-            result, sub_plan = self.hierarchical_plan(beta, G, i - 1)
+            result, sub_plan = self.hierarchical_plan_v1(beta, G, i - 1)
             # if i == 2:
             #     print(sub_plan)
             if result == False:
@@ -97,7 +98,30 @@ class Hierarchical_plan():
                 plan =  plan + sub_plan
         return True, plan
 
-    def hierarchical_plan_probabilistic(self, S, G, i):
+    def __stitch_gaps(self,start_as_matrix, goal_as_matrix,i):
+        # print(S)
+        # print(plan[0].I)
+        # print("start is not subset of " + plan[0].name)
+
+        start_as_list = matrix_to_list(start_as_matrix)
+
+        possible_plans = []
+
+        for j in range(len(start_as_list)):
+            state = start_as_list[j]
+
+            possible = np.zeros((8, 8))
+            possible[state[0],state[1]] = 1
+            result, sub_plan = self.hierarchical_plan_v2(possible, goal_as_matrix, i - 1)
+            if result == False:
+                print("FAILURE1")
+                return False, []
+
+            possible_plans.append(sub_plan)
+
+        return possible_plans
+
+    def hierarchical_plan_v2(self, S, G, i):
 
         if i < 0:
             print("THIS SHOULD NOT HAPPEN")
@@ -110,95 +134,61 @@ class Hierarchical_plan():
         g_as_list = matrix_to_list(G)
 
         #TODO: add planmatch
-        options = self.options(i,True)
-        planner = PlannerIntersection(options, N)
-        if utils.a_subset_b(start_as_list, modified_g_as_list):
+        options = self.options(i)
+
+        planner = PlannerIntersection(options, N,self.probabilistic)
+
+        # We are already at the Goal
+        if utils.a_subset_b(start_as_list, g_as_list):
             return True,[]
+
         if utils.a_subset_b(start_as_list, modified_g_as_list):
-            return self.hierarchical_plan_probabilistic(S, G, i-1)
+            return self.hierarchical_plan_v2(S, G, i-1)
+
         result, plan = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
-        # format of plan is [start_state, option]
+
         plan_len = len(plan)
-        # the plan should be a sequence of options
-        if not result: # drop to a lower level
-            return self.hierarchical_plan_probabilistic(S, G, i-1)
+
+        # Plan failed: drop to a lower level
+        if not result: 
+            return self.hierarchical_plan_v2(S, G, i-1)
+
         # TO-DO: ADD IS PLAN EFFECTIVE
 
-        #stitching the gaps
+        #stitching gap at start
         index = 0
-        if not utils.a_subset_b(start_as_list, plan[0].initiation_as_list): #stitching gap at start
-            # print(S)
-            # print(plan[0].I)
-            # print("start is not subset of " + plan[0].name)
+        if not utils.a_subset_b(start_as_list, plan[0].initiation_as_list): 
 
-            possible_plans = []
+            sub_plan = self.__stitch_gaps(S,plan[0].I,i)
 
-            for state in start_as_list:
-
-                possible = np.zeros((8, 8))
-                possible[state[0],state[1]] = 1
-                result, sub_plan = self.hierarchical_plan_probabilistic(possible, plan[0].I, i - 1)
-                if result == False:
-                    print("FAILURE1")
-                    return False, []
-
-                possible_plans.append(sub_plan)
-
-            plan = possible_plans + plan
+            plan = sub_plan + plan
             index += 1
 
-                
-        for x in range(plan_len - 1): #stitching intermediate gaps
+        #stitching intermediate gaps
+        for x in range(plan_len - 1): 
+
             previous_option = plan[index]
+
             next_option = plan[index + 1]
+
             if not utils.a_subset_b(previous_option.termination_as_list, next_option.initiation_as_list):
-                # print(previous_option.beta)
-                # print(next_option.I)
-                # print(previous_option.name + " is not subset of " + next_option.name)
 
-                possible_plans = []
+                sub_plan = self.__stitch_gaps(previous_option.beta,next_option.I,i)
 
-                for state in previous_option.termination_as_list:
+                plan = plan[:index+1] + sub_plan + plan[index+1:]
 
-                    possible = np.zeros((8, 8))
-                    possible[state[0],state[1]] = 1
-
-                    result, sub_plan = self.hierarchical_plan_probabilistic(possible, next_option.I, i - 1)
-
-                    if result == False:
-                        print("FAILURE2")
-                        return False, []
-
-                    possible_plans.append(sub_plan)
-
-                plan = plan[:index+1] + possible_plans + plan[index+1:]
                 index += 1
+
             else:
                 index += 1
 
         #stitching gap at end
         last_option = plan[-1]
         if not utils.a_subset_b(last_option.termination_as_list, g_as_list): 
-            # print(last_option.beta)
-            # print(G)
-            # print(last_option.name + " is not subset of goal")
 
-            possible_plans = []
+            sub_plan = self.__stitch_gaps(last_option.beta,G,i)
 
-            for state in last_option.termination_as_list:
-
-                possible = np.zeros((8, 8))
-                possible[state[0],state[1]] = 1
-
-                result, sub_plan = self.hierarchical_plan_probabilistic(possible, G, i - 1)
-
-                if result == False:
-                    print("FAILURE3")
-                    return False, []
-
-                possible_plans.append(sub_plan)
-
-            plan.append(possible_plans)
+            plan.append(sub_plan)
             index += 1
 
         return True, plan
@@ -239,8 +229,8 @@ def execute_plan(plan, start, goal):
             current = execute_plan(sub, current,goal)
         elif utils.a_subset_b(matrix_to_list(current),sub.initiation_as_list):
             current = sub.execute_policy_probabilistic(current)
+            #current = sub.execute_policy(current)
             print(sub.name)
-            #print(current)
     return current
 
 
@@ -250,16 +240,13 @@ if __name__ == "__main__":
     arr1[0, 0] = 1 #set start state
 
     arr2 = np.zeros((8, 8))
-    # arr2[7, 6] = 1 #set goal state
-    # arr2[6, 7] = 1 #set goal state
-    # arr2[7, 7] = 1 #set goal state
     arr2[6, 6] = 1 #set goal state
 
     print("==============================")
     print ("Deterministic Planning Time")
     hp_planner = Hierarchical_plan()
     start_time = time.time()
-    plan = hp_planner.hierarchical_plan(arr1, arr2, 2)
+    plan = hp_planner.hierarchical_plan_v1(arr1, arr2, 2)
     end_time = time.time()
 
     for o in plan[1]:
@@ -271,9 +258,12 @@ if __name__ == "__main__":
     print("==============================")
 
     print ("Stochastic Planning Time")
-    hp_planner_stochastic = Hierarchical_plan()
+
+    probabilistic = False
+
+    hp_planner_stochastic = Hierarchical_plan(probabilistic)
     start_time = time.time()
-    plan = hp_planner_stochastic.hierarchical_plan_probabilistic(arr1, arr2, 2)
+    plan = hp_planner_stochastic.hierarchical_plan_v2(arr1, arr2, 2)
     end_time = time.time()
 
     elapsed_time = end_time - start_time
@@ -286,7 +276,7 @@ if __name__ == "__main__":
     print ("Lowest Level Planning Time")
     hp_planner_low= Hierarchical_plan()
     start_time = time.time()
-    plan = hp_planner_low.hierarchical_plan(arr1, arr2, 0)
+    plan = hp_planner_low.hierarchical_plan_v1(arr1, arr2, 0)
     end_time = time.time()
 
     elapsed_time = end_time - start_time

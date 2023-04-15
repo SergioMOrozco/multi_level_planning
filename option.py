@@ -18,7 +18,7 @@ class Option():
         self.termination_as_list = matrix_to_list(self.beta)
 
     def __copy__(self):
-        return type(self)(self.name)
+        return type(self)(self.name,self.I,self.beta,self.pi)
 
     def pickAction(self, state):
         action_number = self.pi[state]

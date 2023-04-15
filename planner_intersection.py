@@ -5,20 +5,26 @@ from neighbourhood import Neighbourhood
 from utils import construct_graph, modify_options, a_subset_b, matrix_to_list, start_as_key_value, a_intersects_b
 
 class PlannerIntersection():
-    def __init__(self, options, N):
+    def __init__(self, options, N, probabilistic):
         self.options = options
         self.options_dict = {}
+        self.probabilistic = probabilistic
 
         for o in options:
             self.options_dict[o.name] = o
 
-        self.graph = construct_graph(options)
         self.modified_options = modify_options(options, N)
 
         self.neighbourhood_function = N
 
         self.modified_graph = construct_graph(self.modified_options)
 
+    def check(self, a_as_list, b_as_list):
+        if self.probabilistic:
+
+            return a_intersects_b(a_as_list,b_as_list)
+
+        return a_subset_b(a_as_list,b_as_list)
 
     def extract_plan(self, name, parents): #backtrack using parents and return the plan
         route = []
@@ -42,8 +48,7 @@ class PlannerIntersection():
         modified_g_as_list = matrix_to_list(self.neighbourhood_function(G))
 
         # we are already at goal state
-        #if a_intersects_b(s_as_list, modified_g_as_list):
-        if a_intersects_b(s_as_list, g_as_list):
+        if self.check(s_as_list, g_as_list):
             print("start is alread at goal")
             return True, []
 
@@ -61,7 +66,7 @@ class PlannerIntersection():
             key = frontier.get()
             for value_option in self.modified_graph[key]:
 
-                if a_intersects_b(value_option.termination_as_list, modified_g_as_list):
+                if self.check(value_option.termination_as_list, modified_g_as_list):
 
                     parents[value_option.name] = [key,value_option]
                     return True, self.extract_plan(value_option.name, parents)
