@@ -107,6 +107,8 @@ class Hierarchical_plan():
 
         possible_plans = []
 
+        # This print statement is an easy check for probabilistic planning
+        #print(len(start_as_list))
         for j in range(len(start_as_list)):
             state = start_as_list[j]
 
@@ -242,6 +244,11 @@ if __name__ == "__main__":
     arr2 = np.zeros((8, 8))
     arr2[6, 6] = 1 #set goal state
 
+    print("START")
+    print(arr1)
+    print("GOAL")
+    print(arr2)
+
     print("==============================")
     print ("Deterministic Planning Time")
     hp_planner = Hierarchical_plan()
@@ -254,12 +261,13 @@ if __name__ == "__main__":
 
     elapsed_time = end_time - start_time
 
+
     print(elapsed_time)
     print("==============================")
 
     print ("Stochastic Planning Time")
 
-    probabilistic = False
+    probabilistic = True
 
     hp_planner_stochastic = Hierarchical_plan(probabilistic)
     start_time = time.time()
@@ -286,10 +294,3 @@ if __name__ == "__main__":
 
     print(elapsed_time)
     print("==============================")
-
-    # print("Printing Plan:")
-    # print("START")
-    # print(arr1)
-    # print("GOAL")
-    # print(arr2)
-    #execute_plan(plan[1],arr1,arr2)
