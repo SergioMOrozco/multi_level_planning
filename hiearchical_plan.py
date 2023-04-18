@@ -5,7 +5,7 @@ import time
 from option import Option
 from action import Action 
 from neighbourhood import Neighbourhood
-from utils import matrix_to_list
+from utils import matrix_to_list, modify_options, construct_graph
 from main import a_subset_b, mdp_2, mdp_1, mdp_0, mdp_2_p, mdp_1_p
 from planner import Planner
 from planner_intersection import PlannerIntersection
@@ -15,6 +15,11 @@ class Hierarchical_plan():
     def __init__(self, probabilistic = False):
         self.neighbourhood = Neighbourhood("naive", 4, 2, 1)
         self.probabilistic = probabilistic
+        # self.modified_options = [None,None,None]
+        # self.modified_graph = [None,None,None]
+        self.modified_options = [modify_options(self.options(0),self.neighbourhood_function(0)),modify_options(self.options(1),self.neighbourhood_function(1)),modify_options(self.options(2),self.neighbourhood_function(2))]
+        self.modified_graph = [construct_graph(self.modified_options[0]),construct_graph(self.modified_options[1]),construct_graph(self.modified_options[2])]
+
 
     def neighbourhood_function(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
         if i == 0:
@@ -138,7 +143,11 @@ class Hierarchical_plan():
         #TODO: add planmatch
         options = self.options(i)
 
-        planner = PlannerIntersection(options, N,self.probabilistic)
+        if self.modified_options[i] is None:
+            self.modified_options[i] = modify_options(options, N)
+            self.modified_graph[i] = construct_graph(self.modified_options[i])
+
+        planner = PlannerIntersection(options, N,self.probabilistic, self.modified_options[i], self.modified_graph[i])
 
         # We are already at the Goal
         if utils.a_subset_b(start_as_list, g_as_list):
@@ -265,9 +274,24 @@ if __name__ == "__main__":
     print(elapsed_time)
     print("==============================")
 
+    print("==============================")
+    print ("Deterministic Planning Time 2")
+    start_time = time.time()
+    plan = hp_planner.hierarchical_plan_v1(arr1, arr2, 2)
+    end_time = time.time()
+
+    for o in plan[1]:
+        print(o[1].name)
+
+    elapsed_time = end_time - start_time
+
+
+    print(elapsed_time)
+    print("==============================")
+
     print ("Stochastic Planning Time")
 
-    probabilistic = True
+    probabilistic = False
 
     hp_planner_stochastic = Hierarchical_plan(probabilistic)
     start_time = time.time()
@@ -281,16 +305,38 @@ if __name__ == "__main__":
     print(elapsed_time)
     print("==============================")
 
-    print ("Lowest Level Planning Time")
-    hp_planner_low= Hierarchical_plan()
+    print ("Stochastic Planning Time 2")
+
+    probabilistic = False
+
     start_time = time.time()
-    plan = hp_planner_low.hierarchical_plan_v1(arr1, arr2, 0)
+    plan = hp_planner_stochastic.hierarchical_plan_v2(arr1, arr2, 2)
     end_time = time.time()
 
     elapsed_time = end_time - start_time
 
-    for o in plan[1]:
-        print(o[1].name)
+    execute_plan(plan[1],arr1,arr2)
+
+    print(elapsed_time)
+    print("==============================")
+
+    print ("Lowest Level Planning Time")
+
+    start_time = time.time()
+
+    N = Neighbourhood("naive",0,0,0).N0
+    planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
+    # #planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
+    # planner = Planner(mdp_0, N)
+    result, plan = planner.bfs_plan(arr1, arr2) #PLAN WITH NEIGHBOURHOODS HERE
+
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+    print(plan)
+
+    # for o in plan[1]:
+    #     print(o[1].name)
 
     print(elapsed_time)
     print("==============================")
