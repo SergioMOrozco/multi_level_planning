@@ -1,10 +1,17 @@
 import numpy as np
+from utils import matrix_to_list
 
 class Action():
     def __init__(self, position, direction):
+        self.position = position
+        self.direction = direction 
         self.name = str(position[0]) + "_" + str(position[1]) + "_" + direction
         # Set I (initiation set), beta (termination set), pi (policy) 
         self._setIBetaPi(position, direction)
+        self.initiation_as_list = matrix_to_list(self.I)
+        self.termination_as_list = matrix_to_list(self.beta)
+    def __copy__(self):
+        return type(self)(self.position,self.direction)
         
     def pickAction(self, state):
         action_number = self.pi[state]
@@ -20,6 +27,9 @@ class Action():
             action = "still"
         # Return action number, used for intra-option model learning
         return action, action_number
+
+    def execute_policy_probabilistic(self,S):
+        return self.execute_policy(S)
 
     def execute_policy(self, S): #starting at position S, returns the state obtained after executing option policy
         #not necessary for primitive actions, included so that they can be handled identically to options in options.py

@@ -1,5 +1,7 @@
 from os import stat_result
 import numpy as np
+import random
+from utils import matrix_to_list
 
 class Option():
     def __init__(self, option, I = None, beta = None, pi = None):
@@ -11,7 +13,13 @@ class Option():
             self.pi = pi
         else:
             self._setIBetaPi()
-        
+
+        self.initiation_as_list = matrix_to_list(self.I)
+        self.termination_as_list = matrix_to_list(self.beta)
+
+    def __copy__(self):
+        return type(self)(self.name,self.I,self.beta,self.pi)
+
     def pickAction(self, state):
         action_number = self.pi[state]
         if action_number == 1:
@@ -27,9 +35,23 @@ class Option():
         # Return action number, used for intra-option model learning
         return action, action_number
 
+    def execute_policy_probabilistic(self,S):
+        pos = np.where(S == 1)
+
+        action = self.pi[pos][0]
+
+        if not action == 0:
+            i = random.randint(0,len(self.termination_as_list) -1)
+            pos = ([self.termination_as_list[i][0]], [self.termination_as_list[i][1]])
+            final_state = np.zeros((8, 8))
+            final_state[pos] = 1
+            return final_state
+
+
     def execute_policy(self, S): #starting at position S, returns the state obtained after executing option policy
         # NOTE: we don't want to actually execute policies while planning, this is just a cheap patch to avoid partitioning the options in main.py by hand
         pos = np.where(S == 1)
+
         # print("pos: ", pos)
         # print(self.beta)
         #print(self.name)
@@ -47,6 +69,9 @@ class Option():
             elif action == 4:
                 x = pos[0][0] + 1
                 y = pos[1][0]
+            elif action == 0:
+                print("action not defined here")
+
             pos = ([x], [y])
         final_state = np.zeros((8, 8))
         final_state[pos] = 1
@@ -72,6 +97,7 @@ class Option():
                     arr[i][j] = 1
                     states.append(arr)
         return states
+
 
 
                

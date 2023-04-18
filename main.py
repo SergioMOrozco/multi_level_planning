@@ -34,44 +34,57 @@ def partition_mdp(mdp): #split the option to obey the subgoal condidion, i.e. al
                 termination_to_initiation[tup] = union(termination_to_initiation[tup], i)
             else:
                 termination_to_initiation[tup] = np.array(i)
+
+        i = 0
         for term_state in termination_to_initiation:
-            new_mdp.append(Option(option.name, termination_to_initiation[term_state], np.array(term_state), option.pi))
+            o = Option(option.name, termination_to_initiation[term_state], np.array(term_state), option.pi)
+            o.name = option.name + "_" + str(i)
+            new_mdp.append(o)
+            i +=1
+
     return new_mdp
 
+def make_mdp_1():
+    return [
+            Option("room_1_quad_1->room_1_quad_2"), Option("room_1_quad_1->room_1_quad_3"),
+            Option("room_1_quad_2->room_1_quad_1"), Option("room_1_quad_2->room_1_quad_4"),
+            Option("room_1_quad_3->room_1_quad_1"), Option("room_1_quad_3->room_1_quad_4"),
+            Option("room_1_quad_4->room_1_quad_2"), Option("room_1_quad_4->room_1_quad_3"),
 
+            Option("room_2_quad_1->room_2_quad_2"), Option("room_2_quad_1->room_2_quad_3"),
+            Option("room_2_quad_2->room_2_quad_1"), Option("room_2_quad_2->room_2_quad_4"),
+            Option("room_2_quad_3->room_2_quad_1"), Option("room_2_quad_3->room_2_quad_4"),
+            Option("room_2_quad_4->room_2_quad_2"), Option("room_2_quad_4->room_2_quad_3"),
 
-mdp_1 = [
-        Option("room_1_quad_1->room_1_quad_2"), Option("room_1_quad_1->room_1_quad_3"),
-        Option("room_1_quad_2->room_1_quad_1"), Option("room_1_quad_2->room_1_quad_4"),
-        Option("room_1_quad_3->room_1_quad_1"), Option("room_1_quad_3->room_1_quad_4"),
-        Option("room_1_quad_4->room_1_quad_2"), Option("room_1_quad_4->room_1_quad_3"),
+            Option("room_3_quad_1->room_3_quad_2"), Option("room_3_quad_1->room_3_quad_3"),
+            Option("room_3_quad_2->room_3_quad_1"), Option("room_3_quad_2->room_3_quad_4"),
+            Option("room_3_quad_3->room_3_quad_1"), Option("room_3_quad_3->room_3_quad_4"),
+            Option("room_3_quad_4->room_3_quad_2"), Option("room_3_quad_4->room_3_quad_3"),
 
-        Option("room_2_quad_1->room_2_quad_2"), Option("room_2_quad_1->room_2_quad_3"),
-        Option("room_2_quad_2->room_2_quad_1"), Option("room_2_quad_2->room_2_quad_4"),
-        Option("room_2_quad_3->room_2_quad_1"), Option("room_2_quad_3->room_2_quad_4"),
-        Option("room_2_quad_4->room_2_quad_2"), Option("room_2_quad_4->room_2_quad_3"),
+            Option("room_4_quad_1->room_4_quad_2"), Option("room_4_quad_1->room_4_quad_3"),
+            Option("room_4_quad_2->room_4_quad_1"), Option("room_4_quad_2->room_4_quad_4"),
+            Option("room_4_quad_3->room_4_quad_1"), Option("room_4_quad_3->room_4_quad_4"),
+            Option("room_4_quad_4->room_4_quad_2"), Option("room_4_quad_4->room_4_quad_3"),
+        ]
 
-        Option("room_3_quad_1->room_3_quad_2"), Option("room_3_quad_1->room_3_quad_3"),
-        Option("room_3_quad_2->room_3_quad_1"), Option("room_3_quad_2->room_3_quad_4"),
-        Option("room_3_quad_3->room_3_quad_1"), Option("room_3_quad_3->room_3_quad_4"),
-        Option("room_3_quad_4->room_3_quad_2"), Option("room_3_quad_4->room_3_quad_3"),
+def make_mdp_2():
+    return [
+            Option("room_1->room_2"), Option("room_1->room_3"),
+            Option("room_2->room_1"), Option("room_2->room_4"),
+            Option("room_3->room_1"), Option("room_3->room_4"),
+            Option("room_4->room_2"), Option("room_4->room_3"),
+        ]
 
-        Option("room_4_quad_1->room_4_quad_2"), Option("room_4_quad_1->room_4_quad_3"),
-        Option("room_4_quad_2->room_4_quad_1"), Option("room_4_quad_2->room_4_quad_4"),
-        Option("room_4_quad_3->room_4_quad_1"), Option("room_4_quad_3->room_4_quad_4"),
-        Option("room_4_quad_4->room_4_quad_2"), Option("room_4_quad_4->room_4_quad_3"),
-    ]
+mdp_1 = make_mdp_1()
+mdp_2 = make_mdp_2()
 
+mdp_1_p = make_mdp_1()
+mdp_2_p = make_mdp_2()
 
-mdp_2 = [
-        Option("room_1->room_2"), Option("room_1->room_3"),
-        Option("room_2->room_1"), Option("room_2->room_4"),
-        Option("room_3->room_1"), Option("room_3->room_4"),
-        Option("room_4->room_2"), Option("room_4->room_3"),
-    ]
 
 mdp_1 = partition_mdp(mdp_1)
 mdp_2 = partition_mdp(mdp_2)
+
 
 mdp_0_placeholder = []
 
@@ -81,6 +94,7 @@ for i in range(8):
         for direction in directions:
             mdp_0_placeholder.append(Action((i,j),direction))
 
+# not sure what this is
 mdp_0 = mdp_0_placeholder
 
 #####################
@@ -114,7 +128,7 @@ def plan_match(start,goal, mdp):
 
 def main():
     print("hello")
-    print([i.beta for i in mdp_0])
+    print(mdp_1[0].termination_as_list)
 
     
     # for option in mdp_2:
