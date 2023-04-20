@@ -281,7 +281,7 @@ class Graph():
                         # in min heap also
                         minHeap.decreaseKey(v, dist[v])
  
-        printArr(dist,V)
+        #printArr(dist,V)
         print(">>> \n")
 
         curr = dest
