@@ -225,13 +225,14 @@ class Graph():
     # of shortest paths from src to all vertices.
     # It is a O(ELogV) function
     def dijkstra(self, src, dest):
-        parent = []
-        path_list = []
+        print(src, " to ", dest)
 
         V = self.V  # Get the number of vertices in graph
         dist = []   # dist values used to pick minimum
                     # weight edge in cut
- 
+
+        parent = []
+
         # minHeap represents set E
         minHeap = Heap()
  
@@ -275,15 +276,20 @@ class Graph():
                 if (minHeap.isInMinHeap(v) and dist[u] != 1e7 and pCrawl[1] + dist[u] < dist[v]):
                         dist[v] = pCrawl[1] + dist[u]
                         parent[v] = u
-                        if v == dest or u == dest:
-                            path_list.append([u,v])
+
                         # update distance value
                         # in min heap also
                         minHeap.decreaseKey(v, dist[v])
  
         printArr(dist,V)
+        print(">>> \n")
+
+        curr = dest
+        while curr != src:
+            print(curr, " <- ", end="")
+            curr = parent[curr]
         #printArr_parent(parent, V)
-        #print(path_list)
+        #print(parent)
 
 
 def printArr(dist, n):
@@ -337,9 +343,9 @@ if __name__ == "__main__":
     # time execution of the graph planner
     
     #start_time = time.time()
-    graph_planner = GraphPlanner([mdp_2, mdp_1])
+    graph_planner = GraphPlanner([mdp_0])
     graph = graph_planner.build_graph_new()
 
     #print(graph)
-    print(graph_planner.find_shortest_path(0, 54))
+    print(graph_planner.find_shortest_path(0, 43))
     #print("--- %s seconds ---" % (time.time() - start_time))
