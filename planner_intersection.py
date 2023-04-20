@@ -5,7 +5,7 @@ from neighbourhood import Neighbourhood
 from utils import construct_graph, modify_options, a_subset_b, matrix_to_list, start_as_key_value, a_intersects_b
 
 class PlannerIntersection():
-    def __init__(self, options, N, probabilistic):
+    def __init__(self, options, N, probabilistic, modified_options, modified_graph):
         self.options = options
         self.options_dict = {}
         self.probabilistic = probabilistic
@@ -13,11 +13,13 @@ class PlannerIntersection():
         for o in options:
             self.options_dict[o.name] = o
 
-        self.modified_options = modify_options(options, N)
+        #self.modified_options = modify_options(options, N)
+        self.modified_options = modified_options 
 
         self.neighbourhood_function = N
 
-        self.modified_graph = construct_graph(self.modified_options)
+        #self.modified_graph = construct_graph(self.modified_options)
+        self.modified_graph = modified_graph 
 
     def check(self, a_as_list, b_as_list):
         if self.probabilistic:
