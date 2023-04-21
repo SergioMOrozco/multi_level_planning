@@ -6,9 +6,10 @@ from option import Option
 from action import Action 
 from neighbourhood import Neighbourhood
 from utils import matrix_to_list, modify_options, construct_graph
-from main import a_subset_b, mdp_2, mdp_1, mdp_0, mdp_2_p, mdp_1_p
+from main import a_subset_b, mdp_2, mdp_1, mdp_0, mdp_2_p, mdp_1_p, mdp_0_sz, mdp_1_sz, mdp_2_sz
 from planner import Planner
 from planner_intersection import PlannerIntersection
+from is_plan_effective import IsPlanEffective
 
 
 class Hierarchical_plan():
@@ -56,6 +57,40 @@ class Hierarchical_plan():
             return mdp_2
         else:
             print("ERROR")
+    
+    def num_options(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
+        if i == 0:
+            return mdp_0_sz
+        elif i == 1:
+            # if self.probabilistic:
+            #     return mdp_1_p
+            return mdp_1_sz
+        elif i == 2:
+            # if self.probabilistic:
+            #     return mdp_2_p
+            return mdp_2_sz
+        else:
+            print("ERROR")
+        
+    def option_sz(self, i):
+        if i == 0:
+            return self.neighbourhood.l0
+        if i == 1:
+            return self.neighbourhood.l1
+        if i == 2:
+            return self.neighbourhood.l2
+        print("ERROR")
+
+    def neighbourhood_sz(self, i):
+        if i == 0:
+            return self.neighbourhood.N0_sz
+        if i == 1:
+            return self.neighbourhood.N1_sz
+        if i == 2:
+            return self.neighbourhood.N2_sz
+        print("ERROR")
+
+
 
     def hierarchical_plan_v1(self, S, G, i):
 
@@ -69,7 +104,7 @@ class Hierarchical_plan():
         planner = Planner(options, N)
         if a_subset_b(S, N(G)):
             return self.hierarchical_plan_v1(S, G, i-1)
-        result, plan = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
+        result, plan, num_gaps = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
         # format of plan is [start_state, option]
         plan_len = len(plan)
         # the plan should be a sequence of options
@@ -77,7 +112,14 @@ class Hierarchical_plan():
             return self.hierarchical_plan_v1(S, G, i-1)
         # TO-DO: ADD IS PLAN EFFECTIVE
 
-
+        if i is not 0:
+            num_options = self.num_options(i - 1)
+            neighbourhood_sz = self.neighbourhood_sz(i)
+            option_sz = self.option_sz(i - 1)
+            IPE = IsPlanEffective(option_sz, num_options, neighbourhood_sz)
+            if not IPE.is_plan_effective(num_gaps, S, G):
+                print("PLAN IS NOT EFFECTIVE, DROPPING TO LOWER")
+                return self.hierarchical_plan_v1(S, G, i-1)
         #stitching the gaps
         index = 0
         if not a_subset_b(S, plan[0][0]): #stitching gap at start
@@ -341,7 +383,7 @@ if __name__ == "__main__":
     planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
     # #planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
     # planner = Planner(mdp_0, N)
-    result, plan = planner.bfs_plan(arr1, arr2) #PLAN WITH NEIGHBOURHOODS HERE
+    result, plan, dummy = planner.bfs_plan(arr1, arr2) #PLAN WITH NEIGHBOURHOODS HERE
 
     end_time = time.time()
 
