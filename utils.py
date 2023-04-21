@@ -2,16 +2,25 @@ import numpy as np
 from copy import copy
 
 def a_subset_b(a,b):
+    overlap = 0
     for i in a:
-        if not i in b:
-            return False
-    return True
-def a_intersects_b(a,b):
-    for i in a:
-        # TODO: need to know how much of an intersection
         if i in b:
-            return True
-    return False
+            overlap += 1
+
+    subset = overlap  == len(a)
+
+    return subset,overlap
+
+def a_intersects_b(a,b):
+    overlap = 0
+    for i in a:
+        if i in b:
+            overlap += 1
+
+    intersects = overlap > 0
+
+    return intersects, overlap
+
 
 def matrix_to_list(matrix):
 
@@ -19,24 +28,45 @@ def matrix_to_list(matrix):
 
     return states.tolist()
 
-def construct_graph(options):
+def construct_graph(options_as_dict, modified_options,probabilistic):
     graph = {}
-    for a in options:
-        for b in options:
-            #if a_intersects_b(a.termination_as_list,b.initiation_as_list):
-            if a_subset_b(a.termination_as_list,b.initiation_as_list):
-                if not a.name in graph.keys():
-                    graph[a.name] = []
-                graph[a.name].append(b)
+    for a in modified_options:
+        for b in modified_options:
+            if probabilistic:
+                intersects, overlap = a_intersects_b(a.termination_as_list,b.initiation_as_list) 
+                if intersects:
+                    is_subset,_ = a_subset_b(options_as_dict[a.name].termination_as_list, options_as_dict[b.name].initiation_as_list)
+                    is_gap = is_subset == False
+                    if not a.name in graph.keys():
+                        graph[a.name] = []
+                    graph[a.name].append([b,overlap,is_gap])
+            else:
+                subset, overlap = a_subset_b(a.termination_as_list,b.initiation_as_list)
+                if subset:
+                    is_subset,_ = a_subset_b(options_as_dict[a.name].termination_as_list, options_as_dict[b.name].initiation_as_list)
+                    is_gap = is_subset == False
+                    if not a.name in graph.keys():
+                        graph[a.name] = []
+                    graph[a.name].append([b,overlap,is_gap])
     return graph
 
 # successors of some set of states
-def start_as_key_value(state_as_list,options):
+def start_as_key_value(state_as_list,options_as_dict,modified_options,probabilistic):
     key = "start"
     value = []
-    for a in options:
-        if a_subset_b(state_as_list,a.initiation_as_list):
-            value.append(a)
+    for a in modified_options:
+        if probabilistic:
+            intersects, overlap = a_intersects_b(state_as_list,a.initiation_as_list) 
+            if intersects:
+                is_subset,_ = a_subset_b(state_as_list, options_as_dict[a.name].initiation_as_list)
+                is_gap = is_subset == False
+                value.append([a,overlap,is_gap])
+        else:
+            subset, overlap = a_subset_b(state_as_list,a.initiation_as_list) 
+            if subset:
+                is_subset,_ = a_subset_b(state_as_list, options_as_dict[a.name].initiation_as_list)
+                is_gap = is_subset == False
+                value.append([a,overlap,is_gap])
 
     return key,value
 
