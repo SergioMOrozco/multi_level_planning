@@ -60,7 +60,7 @@ class Planner():
 
     def bfs_plan(self, S, G):
         if a_subset_b(S, self.N(G)):
-            return True, []
+            return True, [], 0
         reached = [self.to_tuple(S)]
         reached_in_epoch = []
         frontier1 = queue.Queue() 
@@ -76,7 +76,8 @@ class Planner():
             epoch += 1
             if frontier1.empty():
                 if goal_reached:
-                    return True, self.extract_plan(term_state, parents)
+                    num_stitches = self.count_stitches(self.to_tuple(term_state), parents) + (not a_subset_b(term_state, G))
+                    return True, self.extract_plan(term_state, parents), num_stitches
                 elif frontier2.empty():
                     break
                 else:
@@ -105,7 +106,7 @@ class Planner():
                     parents[state_to_tup] = [state, i[0], i[1]]
                     
                     frontier2.put(i[2]) #frontier may have duplicates
-        return False, []
+        return False, [], 0
 
 def pretty_print_plan(plan):
     for i in plan:

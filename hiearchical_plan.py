@@ -6,19 +6,32 @@ from option import Option
 from action import Action 
 from neighbourhood import Neighbourhood
 from utils import matrix_to_list, modify_options, construct_graph
-from main import a_subset_b, mdp_2, mdp_1, mdp_0, mdp_2_p, mdp_1_p
+from main import a_subset_b, mdp_2, mdp_1, mdp_0, mdp_2_p, mdp_1_p, mdp_0_sz, mdp_1_sz, mdp_2_sz
 from planner import Planner
 from planner_intersection import PlannerIntersection
+from is_plan_effective import IsPlanEffective
 
 
 class Hierarchical_plan():
     def __init__(self, probabilistic = False):
         self.neighbourhood = Neighbourhood("naive", 4, 2, 1)
         self.probabilistic = probabilistic
-        # self.modified_options = [None,None,None]
-        # self.modified_graph = [None,None,None]
+        self.options_dicts = []
+        options_dict_0 = {}
+        options_dict_1 = {}
+        options_dict_2 = {}
+
+        for o in self.options(0):
+            options_dict_0[o.name] = o
+        for o in self.options(1):
+            options_dict_1[o.name] = o
+        for o in self.options(2):
+            options_dict_2[o.name] = o
+
+        self.options_dicts = [options_dict_0,options_dict_1,options_dict_2]
+
         self.modified_options = [modify_options(self.options(0),self.neighbourhood_function(0)),modify_options(self.options(1),self.neighbourhood_function(1)),modify_options(self.options(2),self.neighbourhood_function(2))]
-        self.modified_graph = [construct_graph(self.modified_options[0]),construct_graph(self.modified_options[1]),construct_graph(self.modified_options[2])]
+        self.modified_graph = [construct_graph(options_dict_0,self.modified_options[0],probabilistic),construct_graph(options_dict_1,self.modified_options[1],probabilistic),construct_graph(options_dict_2,self.modified_options[2],probabilistic)]
 
 
     def neighbourhood_function(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
@@ -44,6 +57,40 @@ class Hierarchical_plan():
             return mdp_2
         else:
             print("ERROR")
+    
+    def num_options(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
+        if i == 0:
+            return mdp_0_sz
+        elif i == 1:
+            # if self.probabilistic:
+            #     return mdp_1_p
+            return mdp_1_sz
+        elif i == 2:
+            # if self.probabilistic:
+            #     return mdp_2_p
+            return mdp_2_sz
+        else:
+            print("ERROR")
+        
+    def option_sz(self, i):
+        if i == 0:
+            return self.neighbourhood.l0
+        if i == 1:
+            return self.neighbourhood.l1
+        if i == 2:
+            return self.neighbourhood.l2
+        print("ERROR")
+
+    def neighbourhood_sz(self, i):
+        if i == 0:
+            return self.neighbourhood.N0_sz
+        if i == 1:
+            return self.neighbourhood.N1_sz
+        if i == 2:
+            return self.neighbourhood.N2_sz
+        print("ERROR")
+
+
 
     def hierarchical_plan_v1(self, S, G, i):
 
@@ -57,7 +104,7 @@ class Hierarchical_plan():
         planner = Planner(options, N)
         if a_subset_b(S, N(G)):
             return self.hierarchical_plan_v1(S, G, i-1)
-        result, plan = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
+        result, plan, num_gaps = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
         # format of plan is [start_state, option]
         plan_len = len(plan)
         # the plan should be a sequence of options
@@ -65,7 +112,14 @@ class Hierarchical_plan():
             return self.hierarchical_plan_v1(S, G, i-1)
         # TO-DO: ADD IS PLAN EFFECTIVE
 
-
+        if i is not 0:
+            num_options = self.num_options(i - 1)
+            neighbourhood_sz = self.neighbourhood_sz(i)
+            option_sz = self.option_sz(i - 1)
+            IPE = IsPlanEffective(option_sz, num_options, neighbourhood_sz)
+            if not IPE.is_plan_effective(num_gaps, S, G):
+                print("PLAN IS NOT EFFECTIVE, DROPPING TO LOWER LEVEL")
+                return self.hierarchical_plan_v1(S, G, i-1)
         #stitching the gaps
         index = 0
         if not a_subset_b(S, plan[0][0]): #stitching gap at start
@@ -147,13 +201,13 @@ class Hierarchical_plan():
             self.modified_options[i] = modify_options(options, N)
             self.modified_graph[i] = construct_graph(self.modified_options[i])
 
-        planner = PlannerIntersection(options, N,self.probabilistic, self.modified_options[i], self.modified_graph[i])
+        planner = PlannerIntersection(self.options_dicts[i], N,self.probabilistic, self.modified_options[i], self.modified_graph[i])
 
         # We are already at the Goal
-        if utils.a_subset_b(start_as_list, g_as_list):
+        if utils.a_subset_b(start_as_list, g_as_list)[0]:
             return True,[]
 
-        if utils.a_subset_b(start_as_list, modified_g_as_list):
+        if utils.a_subset_b(start_as_list, modified_g_as_list)[0]:
             return self.hierarchical_plan_v2(S, G, i-1)
 
         result, plan = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
@@ -168,7 +222,8 @@ class Hierarchical_plan():
 
         #stitching gap at start
         index = 0
-        if not utils.a_subset_b(start_as_list, plan[0].initiation_as_list): 
+
+        if not utils.a_subset_b(start_as_list, plan[0].initiation_as_list)[0]: 
 
             sub_plan = self.__stitch_gaps(S,plan[0].I,i)
 
@@ -182,7 +237,7 @@ class Hierarchical_plan():
 
             next_option = plan[index + 1]
 
-            if not utils.a_subset_b(previous_option.termination_as_list, next_option.initiation_as_list):
+            if not utils.a_subset_b(previous_option.termination_as_list, next_option.initiation_as_list)[0]:
 
                 sub_plan = self.__stitch_gaps(previous_option.beta,next_option.I,i)
 
@@ -195,7 +250,7 @@ class Hierarchical_plan():
 
         #stitching gap at end
         last_option = plan[-1]
-        if not utils.a_subset_b(last_option.termination_as_list, g_as_list): 
+        if not utils.a_subset_b(last_option.termination_as_list, g_as_list)[0]: 
 
             sub_plan = self.__stitch_gaps(last_option.beta,G,i)
 
@@ -231,14 +286,14 @@ def unit_tests():
 def execute_plan(plan, start, goal):
     current = start
 
-    if utils.a_subset_b(matrix_to_list(current), matrix_to_list(goal)):
+    if utils.a_subset_b(matrix_to_list(current), matrix_to_list(goal))[0]:
         return current
     for sub in plan: 
-        if utils.a_subset_b(matrix_to_list(current), matrix_to_list(goal)):
+        if utils.a_subset_b(matrix_to_list(current), matrix_to_list(goal))[0]:
             return current
         if isinstance(sub, list):
             current = execute_plan(sub, current,goal)
-        elif utils.a_subset_b(matrix_to_list(current),sub.initiation_as_list):
+        elif utils.a_subset_b(matrix_to_list(current),sub.initiation_as_list)[0]:
             current = sub.execute_policy_probabilistic(current)
             #current = sub.execute_policy(current)
             print(sub.name)
@@ -291,7 +346,7 @@ if __name__ == "__main__":
 
     print ("Stochastic Planning Time")
 
-    probabilistic = False
+    probabilistic = True
 
     hp_planner_stochastic = Hierarchical_plan(probabilistic)
     start_time = time.time()
@@ -307,7 +362,7 @@ if __name__ == "__main__":
 
     print ("Stochastic Planning Time 2")
 
-    probabilistic = False
+    probabilistic = True
 
     start_time = time.time()
     plan = hp_planner_stochastic.hierarchical_plan_v2(arr1, arr2, 2)
@@ -320,7 +375,7 @@ if __name__ == "__main__":
     print(elapsed_time)
     print("==============================")
 
-    print ("Lowest Level Planning Time")
+    print ("Planning With All Options")
 
     start_time = time.time()
 
@@ -328,15 +383,14 @@ if __name__ == "__main__":
     planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
     # #planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
     # planner = Planner(mdp_0, N)
-    result, plan = planner.bfs_plan(arr1, arr2) #PLAN WITH NEIGHBOURHOODS HERE
+    result, plan, dummy = planner.bfs_plan(arr1, arr2) #PLAN WITH NEIGHBOURHOODS HERE
 
     end_time = time.time()
 
     elapsed_time = end_time - start_time
-    print(plan)
 
-    # for o in plan[1]:
-    #     print(o[1].name)
+    for o in plan:
+        print(o[1].name)
 
     print(elapsed_time)
     print("==============================")

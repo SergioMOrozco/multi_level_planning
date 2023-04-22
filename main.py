@@ -97,6 +97,10 @@ for i in range(8):
 # not sure what this is
 mdp_0 = mdp_0_placeholder
 
+mdp_0_sz = len(mdp_0)
+mdp_1_sz = len(mdp_1)
+mdp_2_sz = len(mdp_2)
+
 #####################
 
 

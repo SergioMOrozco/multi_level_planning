@@ -4,7 +4,7 @@ import math
 
 #implementation of naive neighbourhood
 class Neighbourhood():
-    def __init__(self, type, l2,  l1, l0):
+    def __init__(self, type, l2 = 4,  l1 = 2, l0 = 1):
         #memoize previously computed neighbourhoods
         self.N1_store = {}
         self.N2_store = {}
@@ -14,6 +14,14 @@ class Neighbourhood():
         self.l0 = l0
         self.l1 = l1
         self.l2 = l2
+        if self.type == "naive":
+            self.N0_sz = 0
+            self.N1_sz = l0
+            self.N2_sz = l1
+        else:
+            self.N0_sz = 0
+            self.N1_sz = l1
+            self.N2_sz = l2
     
 
     def union(self, A, B): #take the union of two sets of states
