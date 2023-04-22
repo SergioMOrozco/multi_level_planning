@@ -58,10 +58,11 @@ class GraphPlanner():
 
             # iterate over all the options
             for option in mdp:
-
+                #print("option: ", option, option.termination_as_list)
                 # Q: how to represent a weighted graph? 
                 # iterate over all the initiation states
                 for state in option.list_initiation_states():
+                    #print("\tstate: ", state)
                     # reshape state to a 1D array
                     state_n = np.reshape(state, (64, ))
                     #get the index of 1 in state
@@ -79,7 +80,6 @@ class GraphPlanner():
                         #print(index, term_index, mdp_cost)
                         graph.addEdge(index, term_index, mdp_cost)
             
-            
             cost_ind += 1
 
         self.graph = graph
@@ -87,6 +87,9 @@ class GraphPlanner():
     
     def find_shortest_path(self, start, end):
         self.graph.dijkstra(start, end)
+    
+    def do_BFS(self, src, dest):
+        return self.graph.BFS(src, dest)
     
 class Heap():
  
@@ -196,9 +199,6 @@ class Heap():
             return True
         return False
  
- 
-
- 
 class Graph():
  
     def __init__(self, V):
@@ -220,6 +220,41 @@ class Graph():
         # from dest to src also
         newNode = [src, weight]
         self.graph[dest].insert(0, newNode)
+    
+    # write a function to perform BFS from src to dest
+    def BFS(self, src, dest):
+        # create a queue for BFS
+        queue = []
+        # mark all the vertices as not visited
+        visited = [False] * (self.V)
+        # create a parent array to store the path
+        parent = [-1] * (self.V)
+        # create a distance array to store the distance
+        # from the source to each vertex
+        dist = [1e7] * (self.V)
+        # mark the source as visited and enqueue it
+        queue.append(src)
+        visited[src] = True
+        dist[src] = 0
+        # loop until the queue is empty
+        while queue:
+            # dequeue a vertex from the queue
+            s = queue.pop(0)
+            # get all the adjacent vertices of the dequeued vertex
+            # if a adjacent has not been visited, then mark it visited
+            # and enqueue it
+            for i in self.graph[s]:
+                if visited[i[0]] == False:
+                    queue.append(i[0])
+                    visited[i[0]] = True
+                    parent[i[0]] = s
+                    dist[i[0]] = dist[s] + 1
+        #print(parent)
+        #print(dist)
+        #print(visited)
+        #print(dist[dest])
+        #print(parent[dest])
+        return dist[dest], parent[dest]
  
     # The main function that calculates distances
     # of shortest paths from src to all vertices.
@@ -340,12 +375,25 @@ if __name__ == "__main__":
             Option("room_3->room_1"), Option("room_3->room_4"),
             Option("room_4->room_2"), Option("room_4->room_3"),
         ]
-    # time execution of the graph planner
     
-    #start_time = time.time()
-    graph_planner = GraphPlanner([mdp_0])
+    mdp_1 = partition_mdp(mdp_1)
+    mdp_2 = partition_mdp(mdp_2)
+
+    # FOR VERIFICATION
+    # for opt in mdp_1:
+    #     print("\n", opt.name, ' | ', opt.get_I_state_idx(), ' | ',  opt.get_beta_state_idx())
+
+    # print("\n\n == \n\n")
+    # for opt in mdp_2:
+    #     print("\n", opt.name, ' | ', opt.get_I_state_idx(), ' | ',  opt.get_beta_state_idx())
+
+    
+
+    graph_planner = GraphPlanner([mdp_0, mdp_1, mdp_2])
     graph = graph_planner.build_graph_new()
 
-    #print(graph)
-    print(graph_planner.find_shortest_path(0, 43))
-    #print("--- %s seconds ---" % (time.time() - start_time))
+    start_time = time.time()
+    print(graph_planner.find_shortest_path(14, 45))
+    
+    #print(graph_planner.do_BFS(0, 43))
+    print("--- %s seconds ---" % (time.time() - start_time))

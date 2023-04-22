@@ -10,6 +10,7 @@ class Action():
         self._setIBetaPi(position, direction)
         self.initiation_as_list = matrix_to_list(self.I)
         self.termination_as_list = matrix_to_list(self.beta)
+
     def __copy__(self):
         return type(self)(self.position,self.direction)
         
@@ -58,6 +59,16 @@ class Action():
         for i in range(8):
             for j in range(8):
                 if self.I[i][j] == 1:
+                    arr = np.zeros((8, 8))
+                    arr[i][j] = 1
+                    states.append(arr)
+        return states
+    
+    def list_termination_states(self): #Split a set of states into a list of stat_result
+        states = []
+        for i in range(8):
+            for j in range(8):
+                if self.beta[i][j] == 1:
                     arr = np.zeros((8, 8))
                     arr[i][j] = 1
                     states.append(arr)

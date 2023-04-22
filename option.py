@@ -47,6 +47,25 @@ class Option():
             final_state[pos] = 1
             return final_state
 
+    def get_beta_state_idx(self):
+        list_term_index = []
+        for term_state in self.list_termination_states():
+            # reshape state to a 1D array
+            term_state_n = np.reshape(term_state, (64, ))
+            #get the index of 1 in state
+            term_index = np.where(term_state_n == 1)[0][0]
+            list_term_index.append(term_index)
+        return list_term_index
+
+    def get_I_state_idx(self):
+        list_term_index = []
+        for term_state in self.list_initiation_states():
+            # reshape state to a 1D array
+            term_state_n = np.reshape(term_state, (64, ))
+            #get the index of 1 in state
+            term_index = np.where(term_state_n == 1)[0][0]
+            list_term_index.append(term_index)
+        return list_term_index
 
     def execute_policy(self, S): #starting at position S, returns the state obtained after executing option policy
         # NOTE: we don't want to actually execute policies while planning, this is just a cheap patch to avoid partitioning the options in main.py by hand
