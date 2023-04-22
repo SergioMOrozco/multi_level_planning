@@ -4,11 +4,15 @@ import numpy as np
 import math
 
 class IsPlanEffective():
-    def __init__(self, option_len, num_options, neighbourhood_size) -> None:
+    def __init__(self, option_len, num_options, neighbourhood_size, probability_sucess = 1, alpha = 0) -> None:
+        self.type = type
         self.option_len = option_len
         self.num_options = num_options
 
         self.neighbourhood_size = neighbourhood_size
+        self.prob_success= probability_sucess
+        self.alpha = alpha
+
 
 
     def T(self, gap_sz, option_sz, num_options):
@@ -38,7 +42,7 @@ class IsPlanEffective():
         # print(t_i)
         t_n_minus_1 = self.T(dist, self.option_len, self.num_options)
         # print(t_n_minus_1)
-        if num_gaps * t_i < t_n_minus_1:
+        if num_gaps * t_i  -  self.alpha * self.prob_success < t_n_minus_1 - self.alpha: #DIFFERING FROM PROPOSAL FOR PROBABALISTIC CASE HERE, SEE IF THIS WORKS
             return True
         return False
 

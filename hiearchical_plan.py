@@ -118,7 +118,7 @@ class Hierarchical_plan():
             option_sz = self.option_sz(i - 1)
             IPE = IsPlanEffective(option_sz, num_options, neighbourhood_sz)
             if not IPE.is_plan_effective(num_gaps, S, G):
-                print("PLAN IS NOT EFFECTIVE, DROPPING TO LOWER")
+                print("PLAN IS NOT EFFECTIVE, DROPPING TO LOWER LEVEL")
                 return self.hierarchical_plan_v1(S, G, i-1)
         #stitching the gaps
         index = 0
