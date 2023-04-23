@@ -14,7 +14,7 @@ from is_plan_effective import IsPlanEffective
 
 class Hierarchical_plan():
     def __init__(self, probabilistic = False):
-        self.neighbourhood = Neighbourhood("advanced", 4, 2, 1)
+        self.neighbourhood = Neighbourhood("naived", 4, 2, 1)
         self.probabilistic = probabilistic
         self.options_dicts = []
         options_dict_0 = {}
