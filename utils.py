@@ -1,6 +1,8 @@
 import numpy as np
 from copy import copy
 
+
+#using inbuilt functions could speed this up. Also using some tuples instead of lists so that we can cache values
 def a_subset_b(a,b):
     overlap = 0
     for i in a:

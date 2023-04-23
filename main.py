@@ -100,6 +100,8 @@ mdp_0 = mdp_0_placeholder
 mdp_0_sz = len(mdp_0)
 mdp_1_sz = len(mdp_1)
 mdp_2_sz = len(mdp_2)
+mdp_1_p_sz = len(mdp_1_p)
+mdp_2_p_sz = len(mdp_2_p)
 
 #####################
 
