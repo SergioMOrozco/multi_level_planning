@@ -14,7 +14,7 @@ from is_plan_effective import IsPlanEffective
 
 class Hierarchical_plan():
     def __init__(self, probabilistic = False):
-        self.neighbourhood = Neighbourhood("naive", 4, 2, 1)
+        self.neighbourhood = Neighbourhood("advanced", 4, 2, 1)
         self.probabilistic = probabilistic
         self.options_dicts = []
         options_dict_0 = {}
@@ -114,6 +114,7 @@ class Hierarchical_plan():
         plan_len = len(plan)
         # the plan should be a sequence of options
         if not result: # drop to a lower level
+            print("PLAN FAILED, DROPPING TO LOWER LEVEL")
             return self.hierarchical_plan_v1(S, G, i-1)
         # TO-DO: ADD IS PLAN EFFECTIVE
 
@@ -221,6 +222,7 @@ class Hierarchical_plan():
 
         # Plan failed: drop to a lower level
         if not result: 
+            print("PLAN FAILED, DROPPING TO LOWER LEVEL")
             return self.hierarchical_plan_v2(S, G, i-1)
 
         # TO-DO: ADD IS PLAN EFFECTIVE
@@ -246,7 +248,6 @@ class Hierarchical_plan():
         for x in range(plan_len - 1): 
 
             previous_option = plan[index]
-
             next_option = plan[index + 1]
 
             if not utils.a_subset_b(previous_option.termination_as_list, next_option.initiation_as_list)[0]:
@@ -255,7 +256,7 @@ class Hierarchical_plan():
 
                 plan = plan[:index+1] + sub_plan + plan[index+1:]
 
-                index += 1
+                index += 2
 
             else:
                 index += 1
@@ -324,7 +325,7 @@ def flatten_list(l):
 def unit_tests_2(): #check of both hierarchical plan algorithms return identical answers in the deterministic case
     arr1 = np.zeros((8,8))
     hp_planner = Hierarchical_plan()
-    tests = [[(1, 1), (6, 6)], [(2, 3), (4, 5)], [(6, 4), (3, 1)], [(1, 0), (3, 0)]]
+    tests = [[(1, 1), (7, 7)], [(1, 1), (6, 6)], [(2, 3), (4, 5)], [(6, 4), (3, 1)], [(1, 0), (3, 0)]]
     for i in tests:
         arr1 = np.zeros((8,8))
         arr2 = np.zeros((8,8))
@@ -332,7 +333,10 @@ def unit_tests_2(): #check of both hierarchical plan algorithms return identical
         arr2[i[1][0], i[1][1]] = 1
         print(arr1)
         plan1 = [i[1] for i in hp_planner.hierarchical_plan_v1(arr1, arr2, 2)[1]]
+        print("seperator")
         plan2 = flatten_list(hp_planner.hierarchical_plan_v2(arr1, arr2, 2)[1])
+        print([i.name for i in plan1])
+        print([i.name for i in plan2])
         if plan1 == plan2:
             print("SUCCESS")
         else:
@@ -349,97 +353,97 @@ def unit_tests_2(): #check of both hierarchical plan algorithms return identical
 if __name__ == "__main__":
     unit_tests_2()
 
-    # arr1 = np.zeros((8,8))
-    # arr1[0, 0] = 1 #set start state
+    arr1 = np.zeros((8,8))
+    arr1[0, 0] = 1 #set start state
 
-    # arr2 = np.zeros((8, 8))
-    # arr2[6, 6] = 1 #set goal state
+    arr2 = np.zeros((8, 8))
+    arr2[7, 7] = 1 #set goal state
 
-    # print("START")
-    # print(arr1)
-    # print("GOAL")
-    # print(arr2)
+    print("START")
+    print(arr1)
+    print("GOAL")
+    print(arr2)
 
-    # print("==============================")
-    # print ("Deterministic Planning Time")
-    # hp_planner = Hierarchical_plan()
-    # start_time = time.time()
-    # plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
-    # end_time = time.time()
-    # print("HERE: ", flatten_list(plan[1]))
+    print("==============================")
+    print ("Deterministic Planning Time")
+    hp_planner = Hierarchical_plan()
+    start_time = time.time()
+    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
+    end_time = time.time()
+    print("HERE: ", flatten_list(plan[1]))
 
-    # # for o in plan[1]:
-    # #     print(o[1].name)
-
-    # elapsed_time = end_time - start_time
-
-
-    # print(elapsed_time)
-    # print("==============================")
-
-    # print("==============================")
-    # print ("Deterministic Planning Time 2")
-    # start_time = time.time()
-    # plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
-
-    # end_time = time.time()
-
-    # # for o in plan[1]:
-    # #     print(o[1].name)
-
-    # elapsed_time = end_time - start_time
-
-
-    # print(elapsed_time)
-    # print("==============================")
-
-    # print ("Stochastic Planning Time")
-
-    # probabilistic = True
-
-    # hp_planner_stochastic = Hierarchical_plan(probabilistic)
-    # start_time = time.time()
-    # plan = hp_planner_stochastic.hierarchical_plan_v2(arr1, arr2, 2)
-    # end_time = time.time()
-
-    # elapsed_time = end_time - start_time
-
-    # execute_plan(plan[1],arr1,arr2)
-
-    # print(elapsed_time)
-    # print("==============================")
-
-    # print ("Stochastic Planning Time 2")
-
-    # probabilistic = True
-
-    # start_time = time.time()
-    # plan = hp_planner_stochastic.hierarchical_plan_v2(arr1, arr2, 2)
-    # end_time = time.time()
-
-    # elapsed_time = end_time - start_time
-
-    # execute_plan(plan[1],arr1,arr2)
-
-    # print(elapsed_time)
-    # print("==============================")
-
-    # print ("Planning With All Options")
-
-    # start_time = time.time()
-
-    # N = Neighbourhood("naive",0,0,0).N0
-    # planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
-    # # #planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
-    # # planner = Planner(mdp_0, N)
-    # result, plan, dummy = planner.bfs_plan(arr1, arr2) #PLAN WITH NEIGHBOURHOODS HERE
-
-    # end_time = time.time()
-
-    # elapsed_time = end_time - start_time
-
-    # for o in plan:
+    # for o in plan[1]:
     #     print(o[1].name)
 
-    # print(elapsed_time)
-    # print("==============================")
+    elapsed_time = end_time - start_time
+
+
+    print(elapsed_time)
+    print("==============================")
+
+    print("==============================")
+    print ("Deterministic Planning Time 2")
+    start_time = time.time()
+    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
+
+    end_time = time.time()
+
+    # for o in plan[1]:
+    #     print(o[1].name)
+
+    elapsed_time = end_time - start_time
+
+
+    print(elapsed_time)
+    print("==============================")
+
+    print ("Stochastic Planning Time")
+
+    probabilistic = True
+
+    hp_planner_stochastic = Hierarchical_plan(probabilistic)
+    start_time = time.time()
+    plan = hp_planner_stochastic.hierarchical_plan_v2(arr1, arr2, 2)
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+
+    execute_plan(plan[1],arr1,arr2)
+
+    print(elapsed_time)
+    print("==============================")
+
+    print ("Stochastic Planning Time 2")
+
+    probabilistic = True
+
+    start_time = time.time()
+    plan = hp_planner_stochastic.hierarchical_plan_v2(arr1, arr2, 2)
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+
+    execute_plan(plan[1],arr1,arr2)
+
+    print(elapsed_time)
+    print("==============================")
+
+    print ("Planning With All Options")
+
+    start_time = time.time()
+
+    N = Neighbourhood("naive",0,0,0).N0
+    planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
+    # #planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
+    # planner = Planner(mdp_0, N)
+    result, plan, dummy = planner.bfs_plan(arr1, arr2) #PLAN WITH NEIGHBOURHOODS HERE
+
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+
+    for o in plan:
+        print(o[1].name)
+
+    print(elapsed_time)
+    print("==============================")

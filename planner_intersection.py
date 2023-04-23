@@ -167,11 +167,11 @@ class PlannerIntersection():
         # print("OVERLAP:" + str(overlap))
         # print("GAPS:" + str(gaps))
 
+        
+
+        if term_state == None:
+            return False, [], 0, 1
         best_plan = self.extract_plan(term_state, parents)
-
-        if best_plan == []:
-            print("fail")
-
         return not best_plan == None, best_plan, best_num_gaps, best_overlap
 
 if __name__ == "__main__":
