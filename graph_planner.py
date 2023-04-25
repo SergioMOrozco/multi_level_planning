@@ -7,9 +7,10 @@ from collections import defaultdict
 import sys, time
 
 class GraphPlanner():
-    def __init__(self, mdps):
+    def __init__(self, mdps, flag_print=False):
         self.mdps = mdps
         self.graph = None
+        self.flag_print = flag_print
     
     # build a graph of the options and their initiation states
     def build_graph(self):
@@ -49,7 +50,7 @@ class GraphPlanner():
         return graph
     
     def build_graph_new(self):
-        graph = Graph(64)
+        graph = Graph(64, self.flag_print)
 
         cost_ind = 1
         # iterate over all the mdps
@@ -201,9 +202,10 @@ class Heap():
  
 class Graph():
  
-    def __init__(self, V):
+    def __init__(self, V, flag_print = False):
         self.V = V
         self.graph = defaultdict(list)
+        self.flag_print = flag_print
  
     # Adds an edge to an undirected graph
     def addEdge(self, src, dest, weight):
@@ -260,7 +262,8 @@ class Graph():
     # of shortest paths from src to all vertices.
     # It is a O(ELogV) function
     def dijkstra(self, src, dest):
-        print(src, " to ", dest)
+        if self.flag_print:
+            print(src, " to ", dest)
 
         V = self.V  # Get the number of vertices in graph
         dist = []   # dist values used to pick minimum
@@ -317,10 +320,9 @@ class Graph():
                         minHeap.decreaseKey(v, dist[v])
  
         #printArr(dist,V)
-        print(">>> \n")
 
         curr = dest
-        while curr != src:
+        while curr != src and self.flag_print == True:
             print(curr, " <- ", end="")
             curr = parent[curr]
         #printArr_parent(parent, V)
@@ -389,7 +391,7 @@ if __name__ == "__main__":
 
     
 
-    graph_planner = GraphPlanner([mdp_0, mdp_1, mdp_2])
+    graph_planner = GraphPlanner([mdp_0, mdp_1, mdp_2], flag_print=True)
     graph = graph_planner.build_graph_new()
 
     start_time = time.time()

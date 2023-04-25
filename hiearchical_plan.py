@@ -14,7 +14,7 @@ from is_plan_effective import IsPlanEffective
 
 class Hierarchical_plan():
     def __init__(self, probabilistic = False):
-        self.neighbourhood = Neighbourhood("naived", 4, 2, 1)
+        self.neighbourhood = Neighbourhood("naive", 4, 2, 1)
         self.probabilistic = probabilistic
         self.options_dicts = []
         options_dict_0 = {}
@@ -114,7 +114,7 @@ class Hierarchical_plan():
         plan_len = len(plan)
         # the plan should be a sequence of options
         if not result: # drop to a lower level
-            print("PLAN FAILED, DROPPING TO LOWER LEVEL")
+            #print("PLAN FAILED, DROPPING TO LOWER LEVEL")
             return self.hierarchical_plan_v1(S, G, i-1)
         # TO-DO: ADD IS PLAN EFFECTIVE
 
@@ -222,11 +222,11 @@ class Hierarchical_plan():
 
         # Plan failed: drop to a lower level
         if not result: 
-            print("PLAN FAILED, DROPPING TO LOWER LEVEL")
+            #print("PLAN FAILED, DROPPING TO LOWER LEVEL")
             return self.hierarchical_plan_v2(S, G, i-1)
 
         # TO-DO: ADD IS PLAN EFFECTIVE
-        if i is not 0:
+        if i != 0:
             num_options = self.num_options(i - 1)
             neighbourhood_sz = self.neighbourhood_sz(i)
             option_sz = self.option_sz(i - 1)
