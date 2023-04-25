@@ -332,6 +332,8 @@ def unit_tests_2(): #check of both hierarchical plan algorithms return identical
         arr1[i[0][0], i[0][1]] = 1
         arr2[i[1][0], i[1][1]] = 1
         print(arr1)
+        hp_planner.hierarchical_plan_v1(arr1, arr2, 2)
+        print(123)
         plan1 = [i[1] for i in hp_planner.hierarchical_plan_v1(arr1, arr2, 2)[1]]
         print("seperator")
         plan2 = flatten_list(hp_planner.hierarchical_plan_v2(arr1, arr2, 2)[1])
@@ -354,10 +356,10 @@ if __name__ == "__main__":
     unit_tests_2()
 
     arr1 = np.zeros((8,8))
-    arr1[0, 0] = 1 #set start state
+    arr1[2, 3] = 1 #set start state
 
     arr2 = np.zeros((8, 8))
-    arr2[7, 7] = 1 #set goal state
+    arr2[6, 4] = 1 #set goal state
 
     print("START")
     print(arr1)

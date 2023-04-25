@@ -395,7 +395,7 @@ if __name__ == "__main__":
     graph = graph_planner.build_graph_new()
 
     start_time = time.time()
-    print(graph_planner.find_shortest_path(0, 54))
+    print(graph_planner.find_shortest_path(0, 63))
     
     #print(graph_planner.do_BFS(0, 43))
     print("--- %s seconds ---" % (time.time() - start_time))

@@ -74,7 +74,6 @@ class Neighbourhood():
                 return self.N1_store_advanced[hash]
             #ratio should be tunable like a hyperparameter
             ratio = math.ceil(self.l1/self.l0) #made an exception - this definition makes more sense than what is in the proposal for level 1
-            
             for i in range(ratio):
                 S = self.N1_basic(S)
             self.N1_store_advanced[hash] = S

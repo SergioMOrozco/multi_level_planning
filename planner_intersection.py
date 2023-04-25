@@ -78,9 +78,9 @@ class PlannerIntersection():
         s_key, s_value = start_as_key_value(s_as_list,self.options_dict,self.modified_options,self.probabilistic)
 
         #print(s_key,s_value)
-
-        reached = [s_key]
-        reached_in_epoch = [s_key]
+        reached = set()
+        reached.add(s_key)
+        reached_in_epoch = {s_key}
         self.modified_graph[s_key] = s_value
         parents = {s_key: [None, None, 1, 0]}
         term_state = None
@@ -90,7 +90,6 @@ class PlannerIntersection():
 
         frontier.put([s_key,1])
         cur_depth = 0
-
         while (not frontier.empty()):
 
             key, depth = frontier.get()
@@ -105,7 +104,7 @@ class PlannerIntersection():
                 break
             if depth > cur_depth:
                 cur_depth = depth
-                reached_in_epoch = []
+                reached_in_epoch = set()
 
             for value_option,overlap,is_gap in self.modified_graph[key]:
                 overlap *= p_overlap/option_beta
@@ -138,14 +137,14 @@ class PlannerIntersection():
                     # plan, total_overlap, total_gaps = self.extract_plan(value_option.name, parents)
                     # plans.append([plan,total_overlap,total_gaps, depth])
 
-                    reached.append(value_option.name)
+                    reached.add(value_option.name)
 
                     #return True, plan
                     
                 elif not value_option.name in reached or \
                     value_option.name in reached_in_epoch and self.plan_score(value_option.name, parents) > num_gaps - self.alpha * overlap:
-                    reached.append(value_option.name)
-                    reached_in_epoch.append(value_option.name)
+                    reached.add(value_option.name)
+                    reached_in_epoch.add(value_option.name)
                     parents[value_option.name] = [key,value_option, overlap, num_gaps]
                     frontier.put([value_option.name,depth +1])
 
