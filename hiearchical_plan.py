@@ -112,7 +112,7 @@ class Hierarchical_plan():
             return self.hierarchical_plan_v1(S, G, i-1)
         # TO-DO: ADD IS PLAN EFFECTIVE
 
-        if i is not 0:
+        if i != 0:
             num_options = self.num_options(i - 1)
             neighbourhood_sz = self.neighbourhood_sz(i)
             option_sz = self.option_sz(i - 1)
