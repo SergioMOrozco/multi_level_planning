@@ -6,7 +6,7 @@ from neighbourhood import Neighbourhood
 from utils import construct_graph, modify_options, a_subset_b, matrix_to_list, start_as_key_value, a_intersects_b
 
 class PlannerIntersection():
-    def __init__(self, options_as_dict, N, probabilistic, modified_options, modified_graph):
+    def __init__(self, options_as_dict, N, probabilistic, modified_options, modified_graph, planner_alpha = 0):
         self.options_dict = options_as_dict
         self.probabilistic = probabilistic
 
@@ -14,7 +14,7 @@ class PlannerIntersection():
         self.modified_options = modified_options 
 
         self.neighbourhood_function = N
-
+        self.alpha = planner_alpha #ideally planner_apha = alpha[from is plan effective]/plan_time_per_neighbourhood
         #self.modified_graph = construct_graph(self.modified_options)
         self.modified_graph = modified_graph 
 
@@ -30,21 +30,29 @@ class PlannerIntersection():
 
         parent_name = name
 
-        total_overlap = 0
+        total_overlap = 1
         total_gaps = 0
 
-        while parents[parent_name] != None:
+        while parents[parent_name][0] != None:
             parent_name, option,overlap, is_gap = parents[parent_name]
+            # if parent_name == "start": #bad code, fix this
+            #     beta_len = 1
+            # else:
+            #     beta_len = len(self.options_dict[parent_name].termination_as_list)
 
-            total_overlap += overlap
+            # total_overlap *= overlap/ beta_len
 
-            if is_gap:
-                total_gaps += 1
+            # if is_gap:
+            #     total_gaps += 1
 
             # TODO: option needs to be regular option
             route.insert(0,self.options_dict[option.name])
 
-        return route, total_overlap,total_gaps #format: [state from which option executed, option]
+        return route
+
+    def plan_score(self, key, parents):
+        _, _, overlap, num_gaps = parents[key]
+        return num_gaps - self.alpha * overlap
 
     def bfs_plan(self, S, G):
         """
@@ -63,7 +71,7 @@ class PlannerIntersection():
         check , _= self.check(s_as_list,g_as_list)
         if check:
             print("start is alread at goal")
-            return True, []
+            return True, [], 0, 1
 
         frontier = queue.Queue() 
 
@@ -72,45 +80,84 @@ class PlannerIntersection():
         #print(s_key,s_value)
 
         reached = [s_key]
+        reached_in_epoch = [s_key]
         self.modified_graph[s_key] = s_value
-        parents = {s_key:None} 
-
+        parents = {s_key: [None, None, 1, 0]}
+        term_state = None
+        best_efficiency = math.inf
+        best_overlap = None
+        best_num_gaps = None
 
         frontier.put([s_key,1])
+        cur_depth = 0
+
         while (not frontier.empty()):
 
             key, depth = frontier.get()
+            _, option, p_overlap, p_num_gaps = parents[key]
+            if option is None:
+                option_beta = 1
+            else:
+                option_beta = len(option.termination_as_list)
+            # parent_beta = self.options_dict[parent_name].beta
+
+            if depth > max_depth:
+                break
+            if depth > cur_depth:
+                cur_depth = depth
+                reached_in_epoch = []
 
             for value_option,overlap,is_gap in self.modified_graph[key]:
+                overlap *= p_overlap/option_beta
+                num_gaps = p_num_gaps + is_gap
 
                 if self.check(value_option.termination_as_list,modified_g_as_list)[0] and depth <= max_depth:
-                    parents[value_option.name] = [key,value_option,overlap,is_gap]
-
                     if max_depth == math.inf:
                         max_depth = depth
+                    if term_state is None:
+   
+                        num_gaps +=  not a_subset_b(value_option.termination_as_list,g_as_list)[0]
+                     
+                        overlap *= a_intersects_b(value_option.termination_as_list, modified_g_as_list)[1] / len(value_option.termination_as_list)
+                        parents[value_option.name] = [key,value_option,overlap,num_gaps]
+                        term_state = value_option.name
+                        best_overlap = overlap
+                        best_num_gaps = num_gaps
+                        best_efficiency = num_gaps - self.alpha * overlap
+                    
+                    else: 
 
-                    plan, total_overlap, total_gaps = self.extract_plan(value_option.name, parents)
-                    plans.append([plan,total_overlap,total_gaps, depth])
+                        num_gaps +=  not a_subset_b(value_option.termination_as_list,g_as_list)[0]
+                        overlap *= a_intersects_b(value_option.termination_as_list, modified_g_as_list)[1] / len(value_option.termination_as_list)
+                        if num_gaps - self.alpha * overlap <= best_efficiency:
+                            parents[value_option.name] = [key,value_option,overlap,num_gaps]
+                            term_state = value_option.name
+                            best_overlap = overlap
+                            best_num_gaps = num_gaps
+                            best_efficiency = num_gaps - self.alpha * overlap
+                    # plan, total_overlap, total_gaps = self.extract_plan(value_option.name, parents)
+                    # plans.append([plan,total_overlap,total_gaps, depth])
 
                     reached.append(value_option.name)
 
                     #return True, plan
                     
-                elif not value_option.name in reached:
-
+                elif not value_option.name in reached or \
+                    value_option.name in reached_in_epoch and self.plan_score(value_option.name, parents) > num_gaps - self.alpha * overlap:
                     reached.append(value_option.name)
-                    parents[value_option.name] = [key,value_option, overlap, is_gap]
+                    reached_in_epoch.append(value_option.name)
+                    parents[value_option.name] = [key,value_option, overlap, num_gaps]
                     frontier.put([value_option.name,depth +1])
 
-        best_plan = []
-        max_overlap = 0
-        min_gaps = math.inf
+        # best_plan = []
+        # max_overlap = 0
+        # min_gaps = math.inf
 
-        for plan,overlap,gaps,depth in plans:
-            if overlap >= max_overlap and gaps <= min_gaps:
-                best_plan = plan
-                max_overlap = overlap
-                min_gaps = gaps
+        # for plan,overlap,gaps,depth in plans:
+        #     if gaps - self.alpha * overlap < min_gaps - self.alpha * max_overlap:
+        #         best_plan = plan
+        #         max_overlap = overlap
+        #         min_gaps = gaps
 
         # for o in best_plan:
         #     print(o.name)
@@ -120,10 +167,12 @@ class PlannerIntersection():
         # print("OVERLAP:" + str(overlap))
         # print("GAPS:" + str(gaps))
 
-        if best_plan == []:
-            print("fail")
+        
 
-        return not best_plan == None, best_plan
+        if term_state == None:
+            return False, [], 0, 1
+        best_plan = self.extract_plan(term_state, parents)
+        return not best_plan == None, best_plan, best_num_gaps, best_overlap
 
 if __name__ == "__main__":
     neigh = Neighbourhood()

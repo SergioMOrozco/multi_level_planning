@@ -6,7 +6,7 @@ from option import Option
 from action import Action 
 from neighbourhood import Neighbourhood
 from utils import matrix_to_list, modify_options, construct_graph
-from main import a_subset_b, mdp_2, mdp_1, mdp_0, mdp_2_p, mdp_1_p, mdp_0_sz, mdp_1_sz, mdp_2_sz
+from main import a_subset_b, mdp_2, mdp_1, mdp_0, mdp_2_p, mdp_1_p, mdp_0_sz, mdp_1_sz, mdp_2_sz, mdp_1_p_sz, mdp_2_p_sz
 from planner import Planner
 from planner_intersection import PlannerIntersection
 from is_plan_effective import IsPlanEffective
@@ -14,7 +14,7 @@ from is_plan_effective import IsPlanEffective
 
 class Hierarchical_plan():
     def __init__(self, probabilistic = False):
-        self.neighbourhood = Neighbourhood("naive", 4, 2, 1)
+        self.neighbourhood = Neighbourhood("naived", 4, 2, 1)
         self.probabilistic = probabilistic
         self.options_dicts = []
         options_dict_0 = {}
@@ -59,15 +59,20 @@ class Hierarchical_plan():
             print("ERROR")
     
     def num_options(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
+        if self.probabilistic:
+            if i == 0:
+                return mdp_0_sz
+            elif i == 1:
+                return mdp_1_p_sz
+            elif i == 2:
+                return mdp_2_p_sz
+            else:
+                print("ERROR")
         if i == 0:
             return mdp_0_sz
         elif i == 1:
-            # if self.probabilistic:
-            #     return mdp_1_p
             return mdp_1_sz
         elif i == 2:
-            # if self.probabilistic:
-            #     return mdp_2_p
             return mdp_2_sz
         else:
             print("ERROR")
@@ -109,6 +114,7 @@ class Hierarchical_plan():
         plan_len = len(plan)
         # the plan should be a sequence of options
         if not result: # drop to a lower level
+            print("PLAN FAILED, DROPPING TO LOWER LEVEL")
             return self.hierarchical_plan_v1(S, G, i-1)
         # TO-DO: ADD IS PLAN EFFECTIVE
 
@@ -183,6 +189,7 @@ class Hierarchical_plan():
         return possible_plans
 
     def hierarchical_plan_v2(self, S, G, i):
+        #To-DO: Tune hyperparameter values
 
         if i < 0:
             print("THIS SHOULD NOT HAPPEN")
@@ -210,16 +217,23 @@ class Hierarchical_plan():
         if utils.a_subset_b(start_as_list, modified_g_as_list)[0]:
             return self.hierarchical_plan_v2(S, G, i-1)
 
-        result, plan = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
-
+        result, plan, num_gaps, overlap = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
         plan_len = len(plan)
 
         # Plan failed: drop to a lower level
         if not result: 
+            print("PLAN FAILED, DROPPING TO LOWER LEVEL")
             return self.hierarchical_plan_v2(S, G, i-1)
 
         # TO-DO: ADD IS PLAN EFFECTIVE
-
+        if i is not 0:
+            num_options = self.num_options(i - 1)
+            neighbourhood_sz = self.neighbourhood_sz(i)
+            option_sz = self.option_sz(i - 1)
+            IPE = IsPlanEffective(option_sz, num_options, neighbourhood_sz, overlap, 0.5)
+            if not IPE.is_plan_effective(num_gaps, S, G):
+                print("PLAN IS NOT EFFECTIVE, DROPPING TO LOWER LEVEL")
+                return self.hierarchical_plan_v2(S, G, i-1)
         #stitching gap at start
         index = 0
 
@@ -234,7 +248,6 @@ class Hierarchical_plan():
         for x in range(plan_len - 1): 
 
             previous_option = plan[index]
-
             next_option = plan[index + 1]
 
             if not utils.a_subset_b(previous_option.termination_as_list, next_option.initiation_as_list)[0]:
@@ -243,7 +256,7 @@ class Hierarchical_plan():
 
                 plan = plan[:index+1] + sub_plan + plan[index+1:]
 
-                index += 1
+                index += 2
 
             else:
                 index += 1
@@ -259,30 +272,6 @@ class Hierarchical_plan():
 
         return True, plan
 
-def unit_tests():
-    hp_planner = Hierarchical_plan()
-    arr1 = np.zeros((8, 8))
-    arr1[1, 1] = 1 #set start state
-    arr2 = np.zeros((8, 8))
-    arr2[2, 4] = 1 #set goal state
-    correct_plan = ["room_1_quad_1->room_1_quad_2", "1_2_right", "room_1_quad_2->room_1_quad_4", "2_3_right"]
-    plan = [i[1].name for i in hp_planner.hierarchical_plan(arr1, arr2, 1)[1]]
-    if plan == correct_plan:
-        print("PASS")
-    else:
-        print("FAIL")
-    arr1 = np.zeros((8, 8))
-    arr1[3, 3] = 1 #set start state
-    arr2 = np.zeros((8, 8))
-    arr2[5, 3] = 1 #set goal state
-    correct_plan = ["room_1->room_3", "4_3_down"]
-    plan = [i[1].name for i in hp_planner.hierarchical_plan(arr1, arr2, 2)[1]]
-  
-    if plan == correct_plan:
-        print("PASS")
-    else:
-        print("FAIL")
-    
 def execute_plan(plan, start, goal):
     current = start
 
@@ -299,14 +288,76 @@ def execute_plan(plan, start, goal):
             print(sub.name)
     return current
 
+def unit_tests():
+    hp_planner = Hierarchical_plan()
+    arr1 = np.zeros((8, 8))
+    arr1[1, 1] = 1 #set start state
+    arr2 = np.zeros((8, 8))
+    arr2[2, 4] = 1 #set goal state
+    correct_plan = ["room_1_quad_1->room_1_quad_2", "1_2_right", "room_1_quad_2->room_1_quad_4", "2_3_right"]
+    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 1) #[i[1].name for i in hp_planner.hierarchical_plan_v2(arr1, arr2, 1)[1]]
+    print(execute_plan(plan[1], arr1, arr2))
+    if plan == correct_plan:
+        print("PASS")
+    else:
+        print("FAIL")
+    arr1 = np.zeros((8, 8))
+    arr1[3, 3] = 1 #set start state
+    arr2 = np.zeros((8, 8))
+    arr2[5, 3] = 1 #set goal state
+    correct_plan = ["room_1->room_3", "4_3_down"]
+    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2) #[i[1].name for i in hp_planner.hierarchical_plan_v2(arr1, arr2, 2)[1]]
+    print(execute_plan(plan[1], arr1, arr2))
+    if plan == correct_plan:
+        print("PASS")
+    else:
+        print("FAIL")
+
+def flatten_list(l):
+    ans = []
+    for i in l:
+        if isinstance(i, list):
+            ans = ans + flatten_list(i)
+        else:
+            ans.append(i)
+    return ans
+    
+def unit_tests_2(): #check of both hierarchical plan algorithms return identical answers in the deterministic case
+    arr1 = np.zeros((8,8))
+    hp_planner = Hierarchical_plan()
+    tests = [[(1, 1), (7, 7)], [(1, 1), (6, 6)], [(2, 3), (4, 5)], [(6, 4), (3, 1)], [(1, 0), (3, 0)]]
+    for i in tests:
+        arr1 = np.zeros((8,8))
+        arr2 = np.zeros((8,8))
+        arr1[i[0][0], i[0][1]] = 1
+        arr2[i[1][0], i[1][1]] = 1
+        print(arr1)
+        plan1 = [i[1] for i in hp_planner.hierarchical_plan_v1(arr1, arr2, 2)[1]]
+        print("seperator")
+        plan2 = flatten_list(hp_planner.hierarchical_plan_v2(arr1, arr2, 2)[1])
+        print([i.name for i in plan1])
+        print([i.name for i in plan2])
+        if plan1 == plan2:
+            print("SUCCESS")
+        else:
+            print("FAIL")
+            print(plan1)
+            print(plan2)
+            print([i.name for i in plan1])
+            print([i.name for i in plan2])
+
+
+
+
 
 if __name__ == "__main__":
+    unit_tests_2()
 
     arr1 = np.zeros((8,8))
     arr1[0, 0] = 1 #set start state
 
     arr2 = np.zeros((8, 8))
-    arr2[6, 6] = 1 #set goal state
+    arr2[7, 7] = 1 #set goal state
 
     print("START")
     print(arr1)
@@ -317,11 +368,12 @@ if __name__ == "__main__":
     print ("Deterministic Planning Time")
     hp_planner = Hierarchical_plan()
     start_time = time.time()
-    plan = hp_planner.hierarchical_plan_v1(arr1, arr2, 2)
+    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
     end_time = time.time()
+    print("HERE: ", flatten_list(plan[1]))
 
-    for o in plan[1]:
-        print(o[1].name)
+    # for o in plan[1]:
+    #     print(o[1].name)
 
     elapsed_time = end_time - start_time
 
@@ -332,11 +384,12 @@ if __name__ == "__main__":
     print("==============================")
     print ("Deterministic Planning Time 2")
     start_time = time.time()
-    plan = hp_planner.hierarchical_plan_v1(arr1, arr2, 2)
+    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
+
     end_time = time.time()
 
-    for o in plan[1]:
-        print(o[1].name)
+    # for o in plan[1]:
+    #     print(o[1].name)
 
     elapsed_time = end_time - start_time
 
