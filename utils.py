@@ -3,14 +3,18 @@ from copy import copy
 
 
 #using inbuilt functions could speed this up. Also using some tuples instead of lists so that we can cache values
+
+subset_cache = {}
 def a_subset_b(a,b):
+    # if (a, b) in subset_cache:
+    #     return subset_cache[(a, b)]
     overlap = 0
     for i in a:
         if i in b:
             overlap += 1
 
     subset = overlap  == len(a)
-
+    # subset_cache[(a, b)] = (subset, overlap)
     return subset,overlap
 
 def a_intersects_b(a,b):
@@ -28,7 +32,7 @@ def matrix_to_list(matrix):
 
     states = np.argwhere(matrix == 1)
 
-    return states.tolist()
+    return states.tolist()#tuple(map(tuple, states)) #states.totu()
 
 def construct_graph(options_as_dict, modified_options,probabilistic):
     graph = {}

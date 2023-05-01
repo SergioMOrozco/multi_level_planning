@@ -54,7 +54,7 @@ hp_planner = Hierarchical_plan()
 
 
 
-num_test_cases = 100
+num_test_cases = 10000
 list_graph_times = []
 list_hp_times = []
 
@@ -73,7 +73,8 @@ for i in range(num_test_cases):
     else:
         graph_planner.find_shortest_path(start_state, goal_state)
     end_time = time.time()
-    list_graph_times.append(end_time - start_time)
+    if i > 1000:
+        list_graph_times.append(end_time - start_time)
 
 
     start_i = start_state // 8
@@ -89,10 +90,13 @@ for i in range(num_test_cases):
     arr2[goal_i, goal_j] = 1  # set goal state
 
     # find shortest path using hierarchical planner
+    #plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
     start_time = time.time()
     plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
     end_time = time.time()
-    list_hp_times.append(end_time - start_time)
+    print(end_time - start_time)
+    if i > 1000:
+        list_hp_times.append(end_time - start_time)
 
 
 print("Average time for graph planner: ", np.mean(list_graph_times))
