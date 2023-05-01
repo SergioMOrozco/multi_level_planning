@@ -11,6 +11,7 @@ class GraphPlanner():
         self.mdps = mdps
         self.graph = None
         self.flag_print = flag_print
+        self.saved_dist = np.zeros((64, 64))
     
     # build a graph of the options and their initiation states
     def build_graph(self):
@@ -87,7 +88,12 @@ class GraphPlanner():
         return graph
     
     def find_shortest_path(self, start, end):
-        self.graph.dijkstra(start, end)
+        dist = self.graph.dijkstra(start, end)
+        V = 64
+        for i in range(V):
+            self.saved_dist[start, i] = dist[i]
+        
+        #print("final - ", self.saved_dist[start])
     
     def do_BFS(self, src, dest):
         return self.graph.BFS(src, dest)
@@ -318,15 +324,16 @@ class Graph():
                         # update distance value
                         # in min heap also
                         minHeap.decreaseKey(v, dist[v])
- 
-        #printArr(dist,V)
 
+
+        #printArr(dist,V)
         curr = dest
         while curr != src and self.flag_print == True:
             print(curr, " <- ", end="")
             curr = parent[curr]
         #printArr_parent(parent, V)
         #print(parent)
+        return dist
 
 
 def printArr(dist, n):

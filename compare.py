@@ -59,7 +59,8 @@ list_graph_times = []
 list_hp_times = []
 
 for i in range(num_test_cases):
-    print("Test case: ", i)
+    if i%100 == 0:
+        print("Test case: ", i)
 
     # generate random start and goal states
     start_state = random.randint(0, 63)
@@ -67,7 +68,10 @@ for i in range(num_test_cases):
 
     # find shortest path using graph planner
     start_time = time.time()
-    graph_planner.find_shortest_path(start_state, goal_state)
+    if graph_planner.saved_dist[start_state, goal_state] != 0:
+        print("dist = ", graph_planner.saved_dist[start_state, goal_state])
+    else:
+        graph_planner.find_shortest_path(start_state, goal_state)
     end_time = time.time()
     list_graph_times.append(end_time - start_time)
 
