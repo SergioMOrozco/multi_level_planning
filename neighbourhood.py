@@ -35,10 +35,12 @@ class Neighbourhood():
     def f(self, mdp, S): #corresponds to the f function in the proposal
         N = np.copy(S)
         for option in mdp:
-            for state in option.list_initiation_states():
-                # if a_subset_b(option.beta, S):
-                if a_subset_b(option.execute_policy(state), S):
-                    N = self.union(N, state)
+            if a_subset_b(option.beta, S):
+                N = self.union(N, option.I)
+            # for state in option.list_initiation_states():
+            #     # if a_subset_b(option.beta, S):
+            #     if a_subset_b(option.execute_policy(state), S):
+            #         N = self.union(N, state)
         return N
 
 
@@ -110,9 +112,9 @@ class Neighbourhood():
 if __name__ == "__main__":
     neigh = Neighbourhood("advanced", 4, 2, 1)
     arr1 = np.zeros((8, 8))
-    arr1[7, 7] = 1
+    arr1[6, 6] = 1
     print(arr1)
-    print(neigh.N2(arr1))
+    print(neigh.f(mdp_0, arr1))
     # arr2 = np.zeros((8, 8))
     # arr2[0, 1] = 1
     # print(arr1)
