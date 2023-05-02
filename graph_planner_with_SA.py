@@ -1,16 +1,56 @@
-from main import Action, Option, partition_mdp
-
+from main import *
+import queue
 import numpy as np
+from neighbourhood import Neighbourhood
+import math
 from collections import defaultdict
-import time
+import sys, time
 
 class GraphPlanner():
     def __init__(self, mdps, flag_print=False):
         self.mdps = mdps
         self.graph = None
         self.flag_print = flag_print
+        self.saved_dist = np.zeros((64, 64))
     
+    # build a graph of the options and their initiation states
     def build_graph(self):
+        # create an empty adjacency list
+        graph = np.zeros((64, 64))
+
+        cost_ind = 1
+
+        # iterate over all the mdps
+        for mdp in self.mdps:
+            mdp_cost = cost_ind**2
+
+            # iterate over all the options
+            for option in mdp:
+
+                # Q: how to represent a weighted graph? 
+                # iterate over all the initiation states
+                for state in option.list_initiation_states():
+                    # reshape state to a 1D array
+                    state = np.reshape(state, (1, 64))
+                    #get the index of 1 in state
+                    index = np.where(state == 1)
+
+                    # iterate over all the termination states
+                    for term_state in option.list_termination_states():
+                        # reshape state to a 1D array
+                        term_state = np.reshape(term_state, (1, 64))
+                        #get the index of 1 in state
+                        term_index = np.where(term_state == 1)
+                        # add the edge to the graph
+                        graph[index, term_index] = mdp_cost
+            
+            print("mdp_name: ", mdp[0])
+            
+            cost_ind += 1
+
+        return graph
+    
+    def build_graph_new(self):
         graph = Graph(64, self.flag_print)
 
         cost_ind = 1
@@ -24,13 +64,12 @@ class GraphPlanner():
                 # Q: how to represent a weighted graph? 
                 # iterate over all the initiation states
                 for state in option.list_initiation_states():
+                    #print("\tstate: ", state)
                     # reshape state to a 1D array
                     state_n = np.reshape(state, (64, ))
                     #get the index of 1 in state
                     index = np.where(state_n == 1)[0][0]
                     #print("index: ", index, state_n)
-                    # if index == 9:
-                    #     print("index: ", index, option.name)
 
                     # iterate over all the termination states
                     for term_state in option.list_termination_states():
@@ -38,10 +77,6 @@ class GraphPlanner():
                         term_state_n = np.reshape(term_state, (64, ))
                         #get the index of 1 in state
                         term_index = np.where(term_state_n == 1)[0][0]
-
-                        if index == 33 and term_index == 35:
-                            print("\n\n\n> ", index, term_index, option.name)
-
                         # add the edge to the graph
                         #graph[index, term_index] = mdp_cost
                         #print(index, term_index, mdp_cost)
@@ -53,9 +88,10 @@ class GraphPlanner():
         return graph
     
     def find_shortest_path(self, start, end):
-        #print("CHECK -- ", self.graph.graph[35])
         dist = self.graph.dijkstra(start, end)
         V = 64
+        for i in range(V):
+            self.saved_dist[start, i] = dist[i]
         
         #print("final - ", self.saved_dist[start])
     
@@ -295,21 +331,9 @@ class Graph():
         while curr != src and self.flag_print == True:
             print(curr, " <- ", end="")
             curr = parent[curr]
-        #print("\n---\n")
         #printArr_parent(parent, V)
         #print(parent)
-        #print("num_primitive_actions = ", get_num_primitive_actions(src, dest))
         return dist
-
-def get_num_primitive_actions(src, dest):
-    # convert src and dest to (x,y) coordinates
-    src_x = src % 8
-    src_y = src // 8
-    dest_x = dest % 8
-    dest_y = dest // 8
-
-    # compute L1 distance
-    return abs(src_x - dest_x) + abs(src_y - dest_y)
 
 
 def printArr(dist, n):
@@ -323,7 +347,6 @@ def printArr_parent(parent, n):
 
 if __name__ == "__main__":
 
-    mdp_0_placeholder = []
     directions = ["left","right","up","down"]
     for i in range(8):
         for j in range (8):
@@ -366,20 +389,20 @@ if __name__ == "__main__":
     mdp_2 = partition_mdp(mdp_2)
 
     # FOR VERIFICATION
-    for opt in mdp_1:
-        print("\n", opt.name, ' | ', opt.get_I_state_idx(), ' | ',  opt.get_beta_state_idx())
+    # for opt in mdp_1:
+    #     print("\n", opt.name, ' | ', opt.get_I_state_idx(), ' | ',  opt.get_beta_state_idx())
 
-    print("\n\n == \n\n")
-    for opt in mdp_2:
-        print("\n", opt.name, ' | ', opt.get_I_state_idx(), ' | ',  opt.get_beta_state_idx())
+    # print("\n\n == \n\n")
+    # for opt in mdp_2:
+    #     print("\n", opt.name, ' | ', opt.get_I_state_idx(), ' | ',  opt.get_beta_state_idx())
 
     
 
-    graph_planner = GraphPlanner([mdp_0, mdp_2], flag_print=True)
-    graph = graph_planner.build_graph()
+    graph_planner = GraphPlanner([mdp_0, mdp_1, mdp_2], flag_print=True)
+    graph = graph_planner.build_graph_new()
 
     start_time = time.time()
-    print(graph_planner.find_shortest_path(17, 38))
+    print(graph_planner.find_shortest_path(0, 63))
     
     #print(graph_planner.do_BFS(0, 43))
     print("--- %s seconds ---" % (time.time() - start_time))
