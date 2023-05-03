@@ -1,5 +1,8 @@
 from hiearchical_plan import *
 from graph_planner import *
+from planner_naive import PlannerNaive
+from utils import construct_graph
+from main import mdp_0, mdp_1, mdp_2
 
 directions = ["left","right","up","down"]
 for i in range(8):
@@ -50,13 +53,22 @@ graph = graph_planner.build_graph_new()
 
 
 hp_planner = Hierarchical_plan()
+def N(S):
+    return S
+options_dict = {}
+mdp_0 = mdp_0 + mdp_1 + mdp_2
+for o in mdp_0:
+    options_dict[o.name] = o
+naive_planner = PlannerNaive(options_dict, mdp_0, construct_graph(options_dict, mdp_0, False))
+
+#Intersection(options_dict, N, False, mdp_0, construct_graph(options_dict, mdp_0, False))
 
 
 
-
-num_test_cases = 10000
+num_test_cases = 64
 list_graph_times = []
 list_hp_times = []
+list_naive_times = []
 
 for i in range(num_test_cases):
     if i%100 == 0:
@@ -64,7 +76,7 @@ for i in range(num_test_cases):
 
     # generate random start and goal states
     start_state = random.randint(0, 63)
-    goal_state = random.randint(0, 63)
+    goal_state = random.randint(63, 63)
 
     # find shortest path using graph planner
     start_time = time.time()
@@ -90,12 +102,26 @@ for i in range(num_test_cases):
     arr2[goal_i, goal_j] = 1  # set goal state
 
     # find shortest path using hierarchical planner
-    #plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
+    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
     start_time = time.time()
     plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
     end_time = time.time()
-    list_hp_times.append(end_time - start_time)
+    print(end_time - start_time)
+    if i > 10:
+        list_hp_times.append(end_time - start_time)
+
+
+
+    #find path using mnaive planner
+
+    start_time = time.time()
+    plan = naive_planner.bfs_plan(arr1, arr2)
+    end_time = time.time()
+    print(end_time - start_time)
+    if i > 10:
+        list_naive_times.append(end_time - start_time)
 
 
 print("Average time for graph planner: ", np.mean(list_graph_times))
 print("Average time for hierarchical planner: ", np.mean(list_hp_times))
+print("Average time for naive planner: ", np.mean(list_naive_times))
