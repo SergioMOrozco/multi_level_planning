@@ -186,6 +186,8 @@ class Hierarchical_plan():
 
             possible_plans.append(sub_plan)
 
+        if len(possible_plans) == 1:
+            return possible_plans[0]
         return possible_plans
 
     def hierarchical_plan_v2(self, S, G, i):
@@ -272,7 +274,9 @@ class Hierarchical_plan():
 
             sub_plan = self.__stitch_gaps(last_option.beta,G,i)
 
-            plan.append(sub_plan)
+
+            plan = plan + sub_plan
+
             index += 1
 
         return True, plan

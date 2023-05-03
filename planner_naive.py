@@ -43,7 +43,7 @@ class PlannerNaive():
         check , _= self.check(s_as_list,g_as_list)
         if check:
             print("start is alread at goal")
-            return True, [], 0, 1
+            return []
 
         frontier = queue.Queue() 
 
