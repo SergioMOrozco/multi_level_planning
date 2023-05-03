@@ -198,13 +198,18 @@ class Hierarchical_plan():
         N = self.neighbourhood_function(i)
 
         start_as_list = matrix_to_list(S)
+        # t = time.time()
+        
         modified_g_as_list = matrix_to_list(N(G))
+        # if i == 2:
+        #     print("int: ", time.time() - t)
         g_as_list = matrix_to_list(G)
 
         #TODO: add planmatch
         options = self.options(i)
 
         if self.modified_options[i] is None:
+            print("HEREE")
             self.modified_options[i] = modify_options(options, N)
             self.modified_graph[i] = construct_graph(self.modified_options[i])
 
@@ -356,10 +361,10 @@ if __name__ == "__main__":
     unit_tests_2()
 
     arr1 = np.zeros((8,8))
-    arr1[2, 3] = 1 #set start state
+    arr1[1, 1] = 1 #set start state
 
     arr2 = np.zeros((8, 8))
-    arr2[6, 4] = 1 #set goal state
+    arr2[7, 7] = 1 #set goal state
 
     print("START")
     print(arr1)
@@ -370,7 +375,7 @@ if __name__ == "__main__":
     print ("Deterministic Planning Time")
     hp_planner = Hierarchical_plan()
     start_time = time.time()
-    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
+    plan = hp_planner.hierarchical_plan_v1(arr1, arr2, 2)
     end_time = time.time()
     print("HERE: ", flatten_list(plan[1]))
 
@@ -386,7 +391,7 @@ if __name__ == "__main__":
     print("==============================")
     print ("Deterministic Planning Time 2")
     start_time = time.time()
-    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
+    plan = hp_planner.hierarchical_plan_v1(arr1, arr2, 2)
 
     end_time = time.time()
 
@@ -432,12 +437,13 @@ if __name__ == "__main__":
 
     print ("Planning With All Options")
 
-    start_time = time.time()
+    
 
     N = Neighbourhood("naive",0,0,0).N0
     planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
     # #planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
     # planner = Planner(mdp_0, N)
+    start_time = time.time()
     result, plan, dummy = planner.bfs_plan(arr1, arr2) #PLAN WITH NEIGHBOURHOODS HERE
 
     end_time = time.time()
