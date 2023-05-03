@@ -63,7 +63,9 @@ class GraphPlanner():
     
     def find_shortest_path(self, start, end):
         #print("\n\nCHECK -- ", self.graph.graph[1])
-        self.graph.dijkstra(start, end)
+        action_count, primitive_action_count = self.graph.dijkstra(start, end)
+        #print("### ", action_count, primitive_action_count)
+        return action_count, primitive_action_count
     
     def do_BFS(self, src, dest):
         return self.graph.BFS(src, dest)
@@ -290,12 +292,38 @@ class Graph():
                         minHeap.decreaseKey(v, dist[v])
 
         curr = dest
+        action_count = 0
+        primitive_action_count = 0
+        action_list = [src]
         while curr != src and self.flag_print == True:
             print(curr, " <- ", end="")
             curr = parent[curr]
-            print("\n\n")
+            action_count += 1
+            action_list.append(curr)
+        #print("\n\n")
         
+        #print(action_list)
+        action_list[0] = dest
+        #print(action_list)
+        #print("Number of actions: ", action_count)
+
+        primitive_action_count = 0
+        for i in range(len(action_list)-1):
+            pt1 = action_list[i]
+            pt2 = action_list[i+1]
+            
+            # convert pt1 and pt2 to coordinates
+            pt1 = (pt1//8, pt1%8)
+            pt2 = (pt2//8, pt2%8)
+
+            # compute Manhattan distance
+            primitive_action_count += abs(pt1[0]-pt2[0]) + abs(pt1[1]-pt2[1])
+        
+        #print("Number of primitive actions: ", primitive_action_count)
+
         #printArr(dist,V)
+
+        return action_count, primitive_action_count
 
 
 def printArr(dist, n):
@@ -362,7 +390,8 @@ if __name__ == "__main__":
     graph = graph_planner.build_graph_new()
 
     start_time = time.time()
-    print(graph_planner.find_shortest_path(0, 63))
+    action_count, primitive_action_count = graph_planner.find_shortest_path(10, 57)
+    print("\n action count, primitive action count = ", action_count, ' , ', primitive_action_count)
     
     #print(graph_planner.do_BFS(0, 43))
     print("--- %s seconds ---" % (time.time() - start_time))
