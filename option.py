@@ -92,7 +92,7 @@ class Option():
                 print("action not defined here")
 
             pos = ([x], [y])
-        final_state = np.zeros((8, 8))
+        final_state = np.zeros((len(self.beta), len(self.beta[0])))
         final_state[pos] = 1
         return final_state
 
