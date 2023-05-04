@@ -64,7 +64,8 @@ class GraphPlanner():
     def find_shortest_path(self, start, end):
         #print("\n\nCHECK -- ", self.graph.graph[1])
         action_count, primitive_action_count = self.graph.dijkstra(start, end)
-        #print("### ", action_count, primitive_action_count)
+        print("### ", action_count, primitive_action_count)
+
         return action_count, primitive_action_count
     
     def do_BFS(self, src, dest):

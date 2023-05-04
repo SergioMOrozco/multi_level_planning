@@ -13,38 +13,38 @@ for i in range(8):
 
 mdp_0 = mdp_0_placeholder
 
-mdp_1 = [
-    Option("room_1_quad_1->room_1_quad_2"), Option("room_1_quad_1->room_1_quad_3"),
-    Option("room_1_quad_2->room_1_quad_1"), Option("room_1_quad_2->room_1_quad_4"),
-    Option("room_1_quad_3->room_1_quad_1"), Option("room_1_quad_3->room_1_quad_4"),
-    Option("room_1_quad_4->room_1_quad_2"), Option("room_1_quad_4->room_1_quad_3"),
-
-    Option("room_2_quad_1->room_2_quad_2"), Option("room_2_quad_1->room_2_quad_3"),
-    Option("room_2_quad_2->room_2_quad_1"), Option("room_2_quad_2->room_2_quad_4"),
-    Option("room_2_quad_3->room_2_quad_1"), Option("room_2_quad_3->room_2_quad_4"),
-    Option("room_2_quad_4->room_2_quad_2"), Option("room_2_quad_4->room_2_quad_3"),
-
-    Option("room_3_quad_1->room_3_quad_2"), Option("room_3_quad_1->room_3_quad_3"),
-    Option("room_3_quad_2->room_3_quad_1"), Option("room_3_quad_2->room_3_quad_4"),
-    Option("room_3_quad_3->room_3_quad_1"), Option("room_3_quad_3->room_3_quad_4"),
-    Option("room_3_quad_4->room_3_quad_2"), Option("room_3_quad_4->room_3_quad_3"),
-
-    Option("room_4_quad_1->room_4_quad_2"), Option("room_4_quad_1->room_4_quad_3"),
-    Option("room_4_quad_2->room_4_quad_1"), Option("room_4_quad_2->room_4_quad_4"),
-    Option("room_4_quad_3->room_4_quad_1"), Option("room_4_quad_3->room_4_quad_4"),
-    Option("room_4_quad_4->room_4_quad_2"), Option("room_4_quad_4->room_4_quad_3"),
-]
-
-
-mdp_2 = [
-        Option("room_1->room_2"), Option("room_1->room_3"),
-        Option("room_2->room_1"), Option("room_2->room_4"),
-        Option("room_3->room_1"), Option("room_3->room_4"),
-        Option("room_4->room_2"), Option("room_4->room_3"),
-    ]
-
-mdp_1 = partition_mdp(mdp_1)
-mdp_2 = partition_mdp(mdp_2)
+# mdp_1 = [
+#     Option("room_1_quad_1->room_1_quad_2"), Option("room_1_quad_1->room_1_quad_3"),
+#     Option("room_1_quad_2->room_1_quad_1"), Option("room_1_quad_2->room_1_quad_4"),
+#     Option("room_1_quad_3->room_1_quad_1"), Option("room_1_quad_3->room_1_quad_4"),
+#     Option("room_1_quad_4->room_1_quad_2"), Option("room_1_quad_4->room_1_quad_3"),
+#
+#     Option("room_2_quad_1->room_2_quad_2"), Option("room_2_quad_1->room_2_quad_3"),
+#     Option("room_2_quad_2->room_2_quad_1"), Option("room_2_quad_2->room_2_quad_4"),
+#     Option("room_2_quad_3->room_2_quad_1"), Option("room_2_quad_3->room_2_quad_4"),
+#     Option("room_2_quad_4->room_2_quad_2"), Option("room_2_quad_4->room_2_quad_3"),
+#
+#     Option("room_3_quad_1->room_3_quad_2"), Option("room_3_quad_1->room_3_quad_3"),
+#     Option("room_3_quad_2->room_3_quad_1"), Option("room_3_quad_2->room_3_quad_4"),
+#     Option("room_3_quad_3->room_3_quad_1"), Option("room_3_quad_3->room_3_quad_4"),
+#     Option("room_3_quad_4->room_3_quad_2"), Option("room_3_quad_4->room_3_quad_3"),
+#
+#     Option("room_4_quad_1->room_4_quad_2"), Option("room_4_quad_1->room_4_quad_3"),
+#     Option("room_4_quad_2->room_4_quad_1"), Option("room_4_quad_2->room_4_quad_4"),
+#     Option("room_4_quad_3->room_4_quad_1"), Option("room_4_quad_3->room_4_quad_4"),
+#     Option("room_4_quad_4->room_4_quad_2"), Option("room_4_quad_4->room_4_quad_3"),
+# ]
+#
+#
+# mdp_2 = [
+#         Option("room_1->room_2"), Option("room_1->room_3"),
+#         Option("room_2->room_1"), Option("room_2->room_4"),
+#         Option("room_3->room_1"), Option("room_3->room_4"),
+#         Option("room_4->room_2"), Option("room_4->room_3"),
+#     ]
+#
+# mdp_1 = partition_mdp(mdp_1)
+# mdp_2 = partition_mdp(mdp_2)
 
 def get_plan_length_hp(start_state,plan):
     return get_plan_length(start_state,plan[1])
@@ -76,7 +76,7 @@ hp_planner = Hierarchical_plan()
 def N(S):
     return S
 options_dict = {}
-mdp_0 = mdp_0 + mdp_1 + mdp_2
+#mdp_0 = mdp_0 + mdp_1 + mdp_2
 for o in mdp_0:
     options_dict[o.name] = o
 naive_planner = PlannerNaive(options_dict, mdp_0, construct_graph(options_dict, mdp_0, False))
@@ -109,6 +109,7 @@ for i in range(num_test_cases):
     #     print("dist = ", graph_planner.saved_dist[start_state, goal_state])
     # else:
     #     graph_planner.find_shortest_path(start_state, goal_state)
+    print(start_state,goal_state)
     _,low_level_plan_length = graph_planner.find_shortest_path(start_state, goal_state)
     print(low_level_plan_length)
     end_time = time.time()

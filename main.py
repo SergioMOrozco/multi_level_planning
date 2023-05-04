@@ -44,6 +44,98 @@ def partition_mdp(mdp): #split the option to obey the subgoal condidion, i.e. al
 
     return new_mdp
 
+def create_options(start_i,end_i,start_j,end_j,size):
+    #up down left right
+    room_size = abs(end_i - start_i)
+
+    I = np.zeros((size,size))
+    I[start_i:end_i, start_j:end_j] = 1
+
+    # print("Initiation Set")
+    # print(I)
+
+    beta_offsets = [[-room_size,0],[room_size,0],[0,-room_size],[0,room_size]]
+
+    options = []
+
+    for offset in beta_offsets:
+
+        if start_i + offset[0] < 0 or start_i + offset[0] > size:
+            continue
+        if end_i + offset[0] < 0 or end_i + offset[0] > size:
+            continue
+        if start_j + offset[1] < 0 or start_j + offset[1] > size:
+            continue
+        if end_j + offset[1] < 0 or end_j + offset[1] > size:
+            continue
+
+        pi = np.zeros((size,size))
+
+        if  offset[0] < 0:
+            pi[start_i:end_i, start_j:end_j] = 2 # up
+        elif  offset[0] > 0:
+            pi[start_i:end_i, start_j:end_j] = 4 # down
+        elif  offset[1] < 0:
+            pi[start_i:end_i, start_j:end_j] = 1 # left
+        elif  offset[1] > 0:
+            pi[start_i:end_i, start_j:end_j] = 3 # right
+
+        beta_start_i = start_i + offset[0]
+        beta_end_i = end_i + offset[0]
+
+        beta_start_j = start_j + offset[1]
+        beta_end_j = end_j + offset[1]
+
+        beta = np.zeros((size,size))
+        beta[beta_start_i:beta_end_i, beta_start_j:beta_end_j] = 1
+
+        name = "["+str(start_i)+":"+str(end_i)+","+str(start_j)+":"+str(end_j)+"]"+"["+str(beta_start_i)+":"+str(beta_end_i)+","+str(beta_start_j)+":"+str(beta_end_j)+"]"
+        option = Option(name,I,beta,pi)
+        # print("Beta Set")
+        # print(beta)
+        # print(option.name)
+
+        options.append(option)
+
+    return options
+
+    
+def make_hierarchy(size):
+
+    mdps = []
+
+    room_size = int(size / 2)
+
+    while True:
+
+        if room_size == 1:
+            break
+
+        mdp = []
+        start_i = 0
+        end_i = room_size
+
+        
+        while end_i <= size:
+            start_j = 0
+            end_j = room_size
+            while end_j <= size:
+                options = create_options(start_i,end_i,start_j,end_j,size)
+                mdp = mdp + options
+
+                start_j = end_j
+                end_j += room_size 
+
+            start_i = end_i
+            end_i += room_size 
+
+        mdps.append(mdp)
+
+        room_size /= 2
+        room_size = int(room_size)
+
+    return mdps
+
 def make_mdp_1():
     return [
             Option("room_1_quad_1->room_1_quad_2"), Option("room_1_quad_1->room_1_quad_3"),
@@ -75,8 +167,11 @@ def make_mdp_2():
             Option("room_4->room_2"), Option("room_4->room_3"),
         ]
 
-mdp_1 = make_mdp_1()
-mdp_2 = make_mdp_2()
+mdps = make_hierarchy(8)
+mdp_2 = mdps[0]
+mdp_1 = mdps[1]
+# mdp_1 = make_mdp_1()
+# mdp_2 = make_mdp_2()
 
 mdp_1_p = make_mdp_1()
 mdp_2_p = make_mdp_2()
@@ -133,8 +228,7 @@ def plan_match(start,goal, mdp):
     return False
 
 def main():
-    print("hello")
-    print(mdp_1[0].termination_as_list)
+    make_hierarchy(8)
 
     
     # for option in mdp_2:
