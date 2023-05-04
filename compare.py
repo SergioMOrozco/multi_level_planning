@@ -85,7 +85,7 @@ naive_planner = PlannerNaive(options_dict, mdp_0, construct_graph(options_dict, 
 
 
 
-num_test_cases = 64
+num_test_cases = 1000
 list_graph_times = []
 list_hp_times = []
 list_naive_times = []
@@ -109,9 +109,9 @@ for i in range(num_test_cases):
     #     print("dist = ", graph_planner.saved_dist[start_state, goal_state])
     # else:
     #     graph_planner.find_shortest_path(start_state, goal_state)
-    print(start_state,goal_state)
+    #print(start_state,goal_state)
     _,low_level_plan_length = graph_planner.find_shortest_path(start_state, goal_state)
-    print(low_level_plan_length)
+    #print(low_level_plan_length)
     end_time = time.time()
     list_graph_lengths.append(low_level_plan_length)
     list_graph_times.append(end_time - start_time)
@@ -134,7 +134,7 @@ for i in range(num_test_cases):
     start_time = time.time()
     plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
     end_time = time.time()
-    print(end_time - start_time)
+    #print(end_time - start_time)
 
     low_level_plan_length = get_plan_length_hp([start_i,start_j],plan)
     list_hp_lengths.append(low_level_plan_length)
@@ -149,7 +149,7 @@ for i in range(num_test_cases):
     start_time = time.time()
     plan = naive_planner.bfs_plan(arr1, arr2)
     end_time = time.time()
-    print(end_time - start_time)
+    #print(end_time - start_time)
 
     low_level_plan_length = get_plan_length([start_i,start_j],plan)
     list_naive_lengths.append(low_level_plan_length)

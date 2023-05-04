@@ -64,7 +64,7 @@ class GraphPlanner():
     def find_shortest_path(self, start, end):
         #print("\n\nCHECK -- ", self.graph.graph[1])
         action_count, primitive_action_count = self.graph.dijkstra(start, end)
-        print("### ", action_count, primitive_action_count)
+        #print("### ", action_count, primitive_action_count)
 
         return action_count, primitive_action_count
     
@@ -296,8 +296,9 @@ class Graph():
         action_count = 0
         primitive_action_count = 0
         action_list = [src]
-        while curr != src and self.flag_print == True:
-            print(curr, " <- ", end="")
+        while curr != src:
+            if self.flag_print == True:
+                print(curr, " <- ", end="")
             curr = parent[curr]
             action_count += 1
             action_list.append(curr)
@@ -310,6 +311,7 @@ class Graph():
 
         primitive_action_count = 0
         for i in range(len(action_list)-1):
+            #print("HERE")
             pt1 = action_list[i]
             pt2 = action_list[i+1]
             
