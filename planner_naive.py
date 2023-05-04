@@ -1,9 +1,8 @@
 import queue
 import numpy as np
 import math
-from main import mdp_2, mdp_1, mdp_0
+from main import mdp_0
 from neighbourhood import Neighbourhood
-from planner import Planner
 from utils import construct_graph, modify_options, a_subset_b, matrix_to_list, start_as_key_value, a_intersects_b
 
 class PlannerNaive():
@@ -82,16 +81,17 @@ class PlannerNaive():
     
 
 if __name__ == "__main__":
-    options_dict = {}
-    for o in mdp_0:
-        options_dict[o.name] = o
-    planner = PlannerNaive(options_dict, mdp_0, construct_graph(options_dict, mdp_0, False))
-    arr1 = np.zeros((8, 8))
-    arr1[1, 1] = 1
-    arr2 = np.zeros((8, 8))
-    arr2[7, 7] = 1
-    plan = planner.bfs_plan(arr1, arr2)
-    for o in plan:
-        print(o.name)
+    pass
+    # options_dict = {}
+    # for o in mdp_0:
+    #     options_dict[o.name] = o
+    # planner = PlannerNaive(options_dict, mdp_0, construct_graph(options_dict, mdp_0, False))
+    # arr1 = np.zeros((8, 8))
+    # arr1[1, 1] = 1
+    # arr2 = np.zeros((8, 8))
+    # arr2[7, 7] = 1
+    # plan = planner.bfs_plan(arr1, arr2)
+    # for o in plan:
+    #     print(o.name)
 
     

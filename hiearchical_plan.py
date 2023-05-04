@@ -6,162 +6,71 @@ from option import Option
 from action import Action 
 from neighbourhood import Neighbourhood
 from utils import matrix_to_list, modify_options, construct_graph
-from main import a_subset_b, mdp_2, mdp_1, mdp_0, mdp_2_p, mdp_1_p, mdp_0_sz, mdp_1_sz, mdp_2_sz, mdp_1_p_sz, mdp_2_p_sz
-from planner import Planner
+from main import a_subset_b, mdp_0
 from planner_intersection import PlannerIntersection
 from is_plan_effective import IsPlanEffective
+from main import mdps
+from dimension import *
+
 
 
 class Hierarchical_plan():
     def __init__(self, probabilistic = False):
-        self.neighbourhood = Neighbourhood("naive", 4, 2, 1)
+        self.neighbourhood = Neighbourhood("naive", mdps)
         self.probabilistic = probabilistic
-        self.options_dicts = []
-        options_dict_0 = {}
-        options_dict_1 = {}
-        options_dict_2 = {}
+        self.options_dicts = [{} for i in range(num_levels)]
+        for i in range(num_levels):
+            for option in mdps[i]:
+                self.options_dicts[i][option.name] = option
 
-        for o in self.options(0):
-            options_dict_0[o.name] = o
-        for o in self.options(1):
-            options_dict_1[o.name] = o
-        for o in self.options(2):
-            options_dict_2[o.name] = o
-
-        self.options_dicts = [options_dict_0,options_dict_1,options_dict_2]
-
-        self.modified_options = [modify_options(self.options(0),self.neighbourhood_function(0)),modify_options(self.options(1),self.neighbourhood_function(1)),modify_options(self.options(2),self.neighbourhood_function(2))]
-        self.modified_graph = [construct_graph(options_dict_0,self.modified_options[0],probabilistic),construct_graph(options_dict_1,self.modified_options[1],probabilistic),construct_graph(options_dict_2,self.modified_options[2],probabilistic)]
-
-
-    def neighbourhood_function(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
-        if i == 0:
-            return self.neighbourhood.N0
-        elif i == 1:
-            return self.neighbourhood.N1
-        elif i == 2:
-            return self.neighbourhood.N2
-        else:
-            print("ERROR")
+        self.modified_options = [modify_options(mdps[i], self.neighbourhood_function(i)) for i in range(num_levels)]
+        self.modified_graph = [construct_graph(self.options_dicts[i], self.modified_options[i], probabilistic) for i in range(num_levels)]
     
-    def options(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
-        if i == 0:
-            return mdp_0
-        elif i == 1:
-            if self.probabilistic:
-                return mdp_1_p
-            return mdp_1
-        elif i == 2:
-            if self.probabilistic:
-                return mdp_2_p
-            return mdp_2
-        else:
-            print("ERROR")
+
+
+    def neighbourhood_function(self, i):
+        def N(S):
+            return self.neighbourhood.N(S, i)
+        return N
+    def options(self, i):
+        return mdps[i]
     
-    def num_options(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
-        if self.probabilistic:
-            if i == 0:
-                return mdp_0_sz
-            elif i == 1:
-                return mdp_1_p_sz
-            elif i == 2:
-                return mdp_2_p_sz
-            else:
-                print("ERROR")
-        if i == 0:
-            return mdp_0_sz
-        elif i == 1:
-            return mdp_1_sz
-        elif i == 2:
-            return mdp_2_sz
-        else:
-            print("ERROR")
+    # def num_options(self, i): #r eturns the neighbourhood_function for the ith level of abstraction
+    #     if self.probabilistic:
+    #         if i == 0:
+    #             return mdp_0_sz
+    #         elif i == 1:
+    #             return mdp_1_p_sz
+    #         elif i == 2:
+    #             return mdp_2_p_sz
+    #         else:
+    #             print("ERROR")
+    #     if i == 0:
+    #         return mdp_0_sz
+    #     elif i == 1:
+    #         return mdp_1_sz
+    #     elif i == 2:
+    #         return mdp_2_sz
+    #     else:
+    #         print("ERROR")
         
-    def option_sz(self, i):
-        if i == 0:
-            return self.neighbourhood.l0
-        if i == 1:
-            return self.neighbourhood.l1
-        if i == 2:
-            return self.neighbourhood.l2
-        print("ERROR")
+    # def option_sz(self, i):
+    #     if i == 0:
+    #         return self.neighbourhood.l0
+    #     if i == 1:
+    #         return self.neighbourhood.l1
+    #     if i == 2:
+    #         return self.neighbourhood.l2
+    #     print("ERROR")
 
-    def neighbourhood_sz(self, i):
-        if i == 0:
-            return self.neighbourhood.N0_sz
-        if i == 1:
-            return self.neighbourhood.N1_sz
-        if i == 2:
-            return self.neighbourhood.N2_sz
-        print("ERROR")
-
-
-
-    def hierarchical_plan_v1(self, S, G, i):
-
-        if i < 0:
-            print("THIS SHOULD NOT HAPPEN")
-            return False, []
-
-        # no plan_match needed atm as there are no state abstractions currently
-        N = self.neighbourhood_function(i)
-        options = self.options(i)
-        planner = Planner(options, N)
-        if a_subset_b(S, N(G)):
-            return self.hierarchical_plan_v1(S, G, i-1)
-        result, plan, num_gaps = planner.bfs_plan(S, G) #PLAN WITH NEIGHBOURHOODS HERE
-        # format of plan is [start_state, option]
-        plan_len = len(plan)
-        # the plan should be a sequence of options
-        if not result: # drop to a lower level
-            #print("PLAN FAILED, DROPPING TO LOWER LEVEL")
-            return self.hierarchical_plan_v1(S, G, i-1)
-        # TO-DO: ADD IS PLAN EFFECTIVE
-
-        if i != 0:
-            num_options = self.num_options(i - 1)
-            neighbourhood_sz = self.neighbourhood_sz(i)
-            option_sz = self.option_sz(i - 1)
-            IPE = IsPlanEffective(option_sz, num_options, neighbourhood_sz)
-            if not IPE.is_plan_effective(num_gaps, S, G):
-                #print("PLAN IS NOT EFFECTIVE, DROPPING TO LOWER LEVEL")
-                return self.hierarchical_plan_v1(S, G, i-1)
-        #stitching the gaps
-        index = 0
-        if not a_subset_b(S, plan[0][0]): #stitching gap at start
-            result, sub_plan = self.hierarchical_plan_v1(S, plan[0][0], i - 1)
-            if result == False:
-                print("FAILURE")
-                return False, []
-            else:
-                plan = sub_plan + plan
-                index += len(sub_plan)
-        for x in range(plan_len - 1): #stitching intermediate gaps
-            beta = plan[index][1].beta
-            I = plan[index + 1][0]
-            if not a_subset_b(beta, I):
-                result, sub_plan = self.hierarchical_plan_v1(beta, I, i - 1)
-                if result == False:
-                    print("FAILURE")
-                    # print(beta, I)
-                    return False, []
-                else:
-                    plan = plan[:index+1] + sub_plan + plan[index+1:]
-                    index +=  1 + len(sub_plan)
-            else:
-                index += 1
-        #stitching gap at end
-        beta = plan[-1][1].beta
-        if not a_subset_b(beta, G): 
-            result, sub_plan = self.hierarchical_plan_v1(beta, G, i - 1)
-            # if i == 2:
-            #     print(sub_plan)
-            if result == False:
-                print("FAILURE")
-                return False, []
-            else:
-                plan =  plan + sub_plan
-        return True, plan
+    # def neighbourhood_sz(self, i):
+    #     if i == 0:
+    #         return self.neighbourhood.N0_sz
+    #     if i == 1:
+    #         return self.neighbourhood.N1_sz
+    #     if i == 2:
+    #         return self.neighbourhood.N2_sz
+    #     print("ERROR")
 
     def __stitch_gaps(self,start_as_matrix, goal_as_matrix,i):
         # print(S)
@@ -177,7 +86,7 @@ class Hierarchical_plan():
         for j in range(len(start_as_list)):
             state = start_as_list[j]
 
-            possible = np.zeros((8, 8))
+            possible = np.zeros((dim, dim))
             possible[state[0],state[1]] = 1
             result, sub_plan = self.hierarchical_plan_v2(possible, goal_as_matrix, i - 1)
             if result == False:
@@ -210,10 +119,10 @@ class Hierarchical_plan():
         #TODO: add planmatch
         options = self.options(i)
 
-        if self.modified_options[i] is None:
-            print("HEREE")
-            self.modified_options[i] = modify_options(options, N)
-            self.modified_graph[i] = construct_graph(self.modified_options[i])
+        # if self.modified_options[i] is None:
+        #     print("HEREE")
+        #     self.modified_options[i] = modify_options(options, N)
+        #     self.modified_graph[i] = construct_graph(self.modified_options[i])
 
         planner = PlannerIntersection(self.options_dicts[i], N,self.probabilistic, self.modified_options[i], self.modified_graph[i])
 
@@ -229,18 +138,18 @@ class Hierarchical_plan():
 
         # Plan failed: drop to a lower level
         if not result: 
-            #print("PLAN FAILED, DROPPING TO LOWER LEVEL")
+            print("PLAN FAILED, DROPPING TO LOWER LEVEL")
             return self.hierarchical_plan_v2(S, G, i-1)
 
         # TO-DO: ADD IS PLAN EFFECTIVE
-        if i != 0:
-            num_options = self.num_options(i - 1)
-            neighbourhood_sz = self.neighbourhood_sz(i)
-            option_sz = self.option_sz(i - 1)
-            IPE = IsPlanEffective(option_sz, num_options, neighbourhood_sz, overlap, 0.5)
-            if not IPE.is_plan_effective(num_gaps, S, G):
-                #print("PLAN IS NOT EFFECTIVE, DROPPING TO LOWER LEVEL")
-                return self.hierarchical_plan_v2(S, G, i-1)
+        # if i != 0:
+        #     num_options = self.num_options(i - 1)
+        #     neighbourhood_sz = self.neighbourhood_sz(i)
+        #     option_sz = self.option_sz(i - 1)
+        #     IPE = IsPlanEffective(option_sz, num_options, neighbourhood_sz, overlap, 0.5)
+        #     if not IPE.is_plan_effective(num_gaps, S, G):
+        #         print("PLAN IS NOT EFFECTIVE, DROPPING TO LOWER LEVEL")
+        #         return self.hierarchical_plan_v2(S, G, i-1)
         #stitching gap at start
         index = 0
 
@@ -278,7 +187,6 @@ class Hierarchical_plan():
             plan = plan + sub_plan
 
             index += 1
-
         return True, plan
 
 def execute_plan(plan, start, goal):
@@ -365,10 +273,10 @@ if __name__ == "__main__":
     unit_tests_2()
 
     arr1 = np.zeros((8,8))
-    arr1[1, 1] = 1 #set start state
+    arr1[1, 2] = 1 #set start state
 
     arr2 = np.zeros((8, 8))
-    arr2[7, 7] = 1 #set goal state
+    arr2[0, 1] = 1 #set goal state
 
     print("START")
     print(arr1)
@@ -379,7 +287,7 @@ if __name__ == "__main__":
     print ("Deterministic Planning Time")
     hp_planner = Hierarchical_plan()
     start_time = time.time()
-    plan = hp_planner.hierarchical_plan_v1(arr1, arr2, 2)
+    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
     end_time = time.time()
     print("HERE: ", flatten_list(plan[1]))
 
@@ -395,12 +303,11 @@ if __name__ == "__main__":
     print("==============================")
     print ("Deterministic Planning Time 2")
     start_time = time.time()
-    plan = hp_planner.hierarchical_plan_v1(arr1, arr2, 2)
-
+    plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
     end_time = time.time()
-
-    # for o in plan[1]:
-    #     print(o[1].name)
+    
+    for o in plan[1]:
+        print(o)
 
     elapsed_time = end_time - start_time
 
@@ -437,25 +344,25 @@ if __name__ == "__main__":
     execute_plan(plan[1],arr1,arr2)
 
     print(elapsed_time)
-    print("==============================")
+    # print("==============================")
 
-    print ("Planning With All Options")
+    # print ("Planning With All Options")
 
     
 
-    N = Neighbourhood("naive",0,0,0).N0
-    planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
-    # #planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
-    # planner = Planner(mdp_0, N)
-    start_time = time.time()
-    result, plan, dummy = planner.bfs_plan(arr1, arr2) #PLAN WITH NEIGHBOURHOODS HERE
+    # N = Neighbourhood("naive",0,0,0).N0
+    # planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
+    # # #planner = Planner(mdp_2 + mdp_1 + mdp_0, N)
+    # # planner = Planner(mdp_0, N)
+    # start_time = time.time()
+    # result, plan, dummy = planner.bfs_plan(arr1, arr2) #PLAN WITH NEIGHBOURHOODS HERE
 
-    end_time = time.time()
+    # end_time = time.time()
 
-    elapsed_time = end_time - start_time
+    # elapsed_time = end_time - start_time
 
-    for o in plan:
-        print(o[1].name)
+    # for o in plan:
+    #     print(o[1].name)
 
-    print(elapsed_time)
-    print("==============================")
+    # print(elapsed_time)
+    # print("==============================")

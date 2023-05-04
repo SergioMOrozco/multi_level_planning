@@ -1,13 +1,13 @@
 import numpy as np
 from option import Option
 from action import Action
+from dimension import dim
 
 # the mdp's 
-
 def union(A, B): #take the union of two sets of states
-    N = np.array([[0 for _ in range(8)] for _ in range(8)])
-    for i in range(8):
-        for j in range(8):
+    N = np.array([[0 for _ in range(dim)] for _ in range(dim)])
+    for i in range(dim):
+        for j in range(dim):
             if A[i][j] or B[i][j]:
                 N[i][j] = 1
     return N
@@ -134,7 +134,7 @@ def make_hierarchy(size):
         room_size /= 2
         room_size = int(room_size)
 
-    return mdps
+    return ["dummy"] + mdps[::-1]
 
 def make_mdp_1():
     return [
@@ -167,36 +167,40 @@ def make_mdp_2():
             Option("room_4->room_2"), Option("room_4->room_3"),
         ]
 
-mdps = make_hierarchy(8)
-mdp_2 = mdps[0]
-mdp_1 = mdps[1]
-# mdp_1 = make_mdp_1()
-# mdp_2 = make_mdp_2()
-
-mdp_1_p = make_mdp_1()
-mdp_2_p = make_mdp_2()
-
-
-mdp_1 = partition_mdp(mdp_1)
-mdp_2 = partition_mdp(mdp_2)
-
 
 mdp_0_placeholder = []
-
 directions = ["left","right","up","down"]
-for i in range(8):
-    for j in range (8):
+for i in range(dim):
+    for j in range (dim):
         for direction in directions:
             mdp_0_placeholder.append(Action((i,j),direction))
 
 # not sure what this is
 mdp_0 = mdp_0_placeholder
+mdps = make_hierarchy(dim)
+for i in range(1, len(mdps)):
+    mdps[i] = partition_mdp(mdps[i])
+mdps[0] = mdp_0
+# mdp_2 = mdps[2]
+# mdp_1 = mdps[1]
+# # mdp_1 = make_mdp_1()
+# # mdp_2 = make_mdp_2()
 
-mdp_0_sz = len(mdp_0)
-mdp_1_sz = len(mdp_1)
-mdp_2_sz = len(mdp_2)
-mdp_1_p_sz = len(mdp_1_p)
-mdp_2_p_sz = len(mdp_2_p)
+# mdp_1_p = make_mdp_1()
+# mdp_2_p = make_mdp_2()
+
+
+# mdp_1 = partition_mdp(mdp_1)
+# mdp_2 = partition_mdp(mdp_2)
+
+
+
+
+# mdp_0_sz = len(mdp_0)
+# mdp_1_sz = len(mdp_1)
+# mdp_2_sz = len(mdp_2)
+# mdp_1_p_sz = len(mdp_1_p)
+# mdp_2_p_sz = len(mdp_2_p)
 
 #####################
 
@@ -204,8 +208,8 @@ mdp_2_p_sz = len(mdp_2_p)
 
 def a_subset_b(a,b):
     # TODO: This could probably be done better
-    for i in range(8):
-        for j in range(8):
+    for i in range(dim):
+        for j in range(dim):
             if not a[(i,j)] <= b[(i,j)] :
                 return False
     return True
@@ -228,7 +232,9 @@ def plan_match(start,goal, mdp):
     return False
 
 def main():
-    make_hierarchy(8)
+    pass
+    # print(len(mdp_1) )
+
 
     
     # for option in mdp_2:

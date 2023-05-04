@@ -1,17 +1,17 @@
 from hiearchical_plan import *
-from graph_planner import *
 from planner_naive import PlannerNaive
 from utils import construct_graph
-from main import mdp_0, mdp_1, mdp_2
+from main import mdp_0
+from dimension import dim
 
-directions = ["left","right","up","down"]
-mdp_0_placeholder = []
-for i in range(8):
-    for j in range (8):
-        for direction in directions:
-            mdp_0_placeholder.append(Action((i,j),direction))
+# directions = ["left","right","up","down"]
+# mdp_0_placeholder = []
+# for i in range(8):
+#     for j in range (8):
+#         for direction in directions:
+#             mdp_0_placeholder.append(Action((i,j),direction))
 
-mdp_0 = mdp_0_placeholder
+# mdp_0 = mdp_0_placeholder
 
 # mdp_1 = [
 #     Option("room_1_quad_1->room_1_quad_2"), Option("room_1_quad_1->room_1_quad_3"),
@@ -66,8 +66,8 @@ def get_plan_length(start_state,plan):
 
     return distance
 
-graph_planner = GraphPlanner([mdp_0, mdp_1, mdp_2])
-graph = graph_planner.build_graph_new()
+# graph_planner = GraphPlanner([mdp_0, mdp_1, mdp_2])
+# graph = graph_planner.build_graph_new()
 
 
 
@@ -99,8 +99,10 @@ for i in range(num_test_cases):
         print("Test case: ", i)
 
     # generate random start and goal states
-    start_state = random.randint(0, 63)
-    goal_state = random.randint(0, 63)
+    start_state = random.randint(0, dim ** 2 - 1)
+    goal_state = random.randint(0, dim ** 2 - 1)
+    if start_state == goal_state:
+        continue
     #goal_state = random.randint(63, 63)
 
     # find shortest path using graph planner
@@ -110,26 +112,26 @@ for i in range(num_test_cases):
     # else:
     #     graph_planner.find_shortest_path(start_state, goal_state)
     #print(start_state,goal_state)
-    _,low_level_plan_length = graph_planner.find_shortest_path(start_state, goal_state)
-    #print(low_level_plan_length)
-    end_time = time.time()
-    list_graph_lengths.append(low_level_plan_length)
-    list_graph_times.append(end_time - start_time)
+    # _,low_level_plan_length = graph_planner.find_shortest_path(start_state, goal_state)
+    # #print(low_level_plan_length)
+    # end_time = time.time()
+    # list_graph_lengths.append(low_level_plan_length)
+    # list_graph_times.append(end_time - start_time)
 
 
-    start_i = start_state // 8
-    start_j = start_state % 8
+    start_i = start_state // dim
+    start_j = start_state % dim
 
-    goal_i = goal_state // 8
-    goal_j = goal_state % 8
+    goal_i = goal_state // dim
+    goal_j = goal_state % dim
 
-    arr1 = np.zeros((8,8))
+    arr1 = np.zeros((dim,dim))
     arr1[start_i, start_j] = 1 #set start state
 
-    arr2 = np.zeros((8, 8))
+    arr2 = np.zeros((dim, dim))
     arr2[goal_i, goal_j] = 1  # set goal state
 
-    # find shortest path using hierarchical planner
+    #find shortest path using hierarchical planner
     plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)
     start_time = time.time()
     plan = hp_planner.hierarchical_plan_v2(arr1, arr2, 2)

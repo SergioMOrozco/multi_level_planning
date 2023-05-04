@@ -1,5 +1,6 @@
 import numpy as np
 from utils import matrix_to_list
+from dimension import dim
 
 class Action():
     def __init__(self, position, direction):
@@ -13,7 +14,8 @@ class Action():
 
     def __copy__(self):
         return type(self)(self.position,self.direction)
-        
+    def __str__(self):
+        return self.name
     def pickAction(self, state):
         action_number = self.pi[state]
         if action_number == 1:
@@ -50,41 +52,41 @@ class Action():
                 x = pos[0][0] + 1
                 y = pos[1][0]
             pos = ([x], [y])
-        final_state = np.zeros((8, 8))
+        final_state = np.zeros((dim, dim))
         final_state[pos] = 1
         return final_state
 
-    def list_initiation_states(self): #Split a set of states into a list of stat_result
-        states = []
-        for i in range(8):
-            for j in range(8):
-                if self.I[i][j] == 1:
-                    arr = np.zeros((8, 8))
-                    arr[i][j] = 1
-                    states.append(arr)
-        return states
+    # def list_initiation_states(self): #Split a set of states into a list of stat_result
+    #     states = []
+    #     for i in range(8):
+    #         for j in range(8):
+    #             if self.I[i][j] == 1:
+    #                 arr = np.zeros((8, 8))
+    #                 arr[i][j] = 1
+    #                 states.append(arr)
+    #     return states
     
-    def list_termination_states(self): #Split a set of states into a list of stat_result
-        states = []
-        for i in range(8):
-            for j in range(8):
-                if self.beta[i][j] == 1:
-                    arr = np.zeros((8, 8))
-                    arr[i][j] = 1
-                    states.append(arr)
-        return states
+    # def list_termination_states(self): #Split a set of states into a list of stat_result
+    #     states = []
+    #     for i in range(8):
+    #         for j in range(8):
+    #             if self.beta[i][j] == 1:
+    #                 arr = np.zeros((8, 8))
+    #                 arr[i][j] = 1
+    #                 states.append(arr)
+    #     return states
 
 
                
     def _setIBetaPi(self, position,direction):
-        self.I = np.zeros((8, 8))
+        self.I = np.zeros((dim, dim))
         self.I[position] = 1 # available at start position
-        self.beta = np.zeros((8, 8))
+        self.beta = np.zeros((dim, dim))
         
         if direction == "left":
             adjusted = (position[0], max(0,position[1] - 1)) # don't move on leftmost positions
             self.beta[adjusted] = 1 # terminates after moving left
-            self.pi = np.zeros((8, 8))
+            self.pi = np.zeros((dim, dim))
 
             # check for edge case
             if not adjusted == position:
@@ -93,25 +95,25 @@ class Action():
         if direction == "up":
             adjusted = (max(0,position[0] -1),position[1]) # don't move on upmost positions
             self.beta[adjusted] = 1 # terminates after moving left
-            self.pi = np.zeros((8, 8))
+            self.pi = np.zeros((dim, dim))
 
             # check for edge case
             if not adjusted == position:
                 self.pi[position] = 2
 
         if direction == "right":
-            adjusted = (position[0], min(7,position[1] + 1)) # don't move on leftmost positions
+            adjusted = (position[0], min(dim - 1,position[1] + 1)) # don't move on leftmost positions
             self.beta[adjusted] = 1 # terminates after moving left
-            self.pi = np.zeros((8, 8))
+            self.pi = np.zeros((dim, dim))
 
             # check for edge case
             if not adjusted == position:
                 self.pi[position] = 3
 
         if direction == "down":
-            adjusted = (min(7,position[0] + 1),position[1]) # don't move on upmost positions
+            adjusted = (min(dim - 1,position[0] + 1),position[1]) # don't move on upmost positions
             self.beta[adjusted] = 1 # terminates after moving left
-            self.pi = np.zeros((8, 8))
+            self.pi = np.zeros((dim, dim))
 
             # check for edge case
             if not adjusted == position:

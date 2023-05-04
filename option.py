@@ -2,9 +2,10 @@ from os import stat_result
 import numpy as np
 import random
 from utils import matrix_to_list
+from dimension import dim
 
 class Option():
-    def __init__(self, option, I = None, beta = None, pi = None):
+    def __init__(self, option, I = None, beta = None, pi = None, ):
         self.name = option
         # Set I (initiation set), beta (termination set), pi (policy) 
         if I is not None:
@@ -35,37 +36,37 @@ class Option():
         # Return action number, used for intra-option model learning
         return action, action_number
 
-    def execute_policy_probabilistic(self,S):
-        pos = np.where(S == 1)
+    # def execute_policy_probabilistic(self,S):
+    #     pos = np.where(S == 1)
 
-        action = self.pi[pos][0]
+    #     action = self.pi[pos][0]
 
-        if not action == 0:
-            i = random.randint(0,len(self.termination_as_list) -1)
-            pos = ([self.termination_as_list[i][0]], [self.termination_as_list[i][1]])
-            final_state = np.zeros((8, 8))
-            final_state[pos] = 1
-            return final_state
+    #     if not action == 0:
+    #         i = random.randint(0,len(self.termination_as_list) -1)
+    #         pos = ([self.termination_as_list[i][0]], [self.termination_as_list[i][1]])
+    #         final_state = np.zeros((8, 8))
+    #         final_state[pos] = 1
+    #         return final_state
 
-    def get_beta_state_idx(self):
-        list_term_index = []
-        for term_state in self.list_termination_states():
-            # reshape state to a 1D array
-            term_state_n = np.reshape(term_state, (64, ))
-            #get the index of 1 in state
-            term_index = np.where(term_state_n == 1)[0][0]
-            list_term_index.append(term_index)
-        return list_term_index
+    # def get_beta_state_idx(self):
+    #     list_term_index = []
+    #     for term_state in self.list_termination_states():
+    #         # reshape state to a 1D array
+    #         term_state_n = np.reshape(term_state, (64, ))
+    #         #get the index of 1 in state
+    #         term_index = np.where(term_state_n == 1)[0][0]
+    #         list_term_index.append(term_index)
+    #     return list_term_index
 
-    def get_I_state_idx(self):
-        list_term_index = []
-        for term_state in self.list_initiation_states():
-            # reshape state to a 1D array
-            term_state_n = np.reshape(term_state, (64, ))
-            #get the index of 1 in state
-            term_index = np.where(term_state_n == 1)[0][0]
-            list_term_index.append(term_index)
-        return list_term_index
+    # def get_I_state_idx(self):
+    #     list_term_index = []
+    #     for term_state in self.list_initiation_states():
+    #         # reshape state to a 1D array
+    #         term_state_n = np.reshape(term_state, (64, ))
+    #         #get the index of 1 in state
+    #         term_index = np.where(term_state_n == 1)[0][0]
+    #         list_term_index.append(term_index)
+    #     return list_term_index
 
     def execute_policy(self, S): #starting at position S, returns the state obtained after executing option policy
         # NOTE: we don't want to actually execute policies while planning, this is just a cheap patch to avoid partitioning the options in main.py by hand
@@ -98,24 +99,24 @@ class Option():
 
     def list_initiation_states(self): #Split a set of states into a list of stat_result
         states = []
-        for i in range(8):
-            for j in range(8):
+        for i in range(dim):
+            for j in range(dim):
                 if self.I[i][j] == 1:
                     #print("here")
-                    arr = np.zeros((8, 8))
+                    arr = np.zeros((dim, dim))
                     arr[i][j] = 1
                     states.append(arr)
         return states
 
-    def list_termination_states(self): #Split a set of states into a list of stat_result
-        states = []
-        for i in range(8):
-            for j in range(8):
-                if self.beta[i][j] == 1:
-                    arr = np.zeros((8, 8))
-                    arr[i][j] = 1
-                    states.append(arr)
-        return states
+    # def list_termination_states(self): #Split a set of states into a list of stat_result
+    #     states = []
+    #     for i in range(8):
+    #         for j in range(8):
+    #             if self.beta[i][j] == 1:
+    #                 arr = np.zeros((8, 8))
+    #                 arr[i][j] = 1
+    #                 states.append(arr)
+    #     return states
 
 
 

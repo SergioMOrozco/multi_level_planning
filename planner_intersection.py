@@ -1,7 +1,6 @@
 import queue
 import numpy as np
 import math
-from main import mdp_2, mdp_1, mdp_0
 from neighbourhood import Neighbourhood
 from utils import construct_graph, modify_options, a_subset_b, matrix_to_list, start_as_key_value, a_intersects_b
 
@@ -123,6 +122,8 @@ class PlannerIntersection():
                         best_overlap = overlap
                         best_num_gaps = num_gaps
                         best_efficiency = num_gaps - self.alpha * overlap
+                        # best_plan = self.extract_plan(term_state, parents)
+                        # return not best_plan == None, best_plan, best_num_gaps, best_overlap
                     
                     else: 
 
@@ -174,27 +175,28 @@ class PlannerIntersection():
         return not best_plan == None, best_plan, best_num_gaps, best_overlap
 
 if __name__ == "__main__":
-    neigh = Neighbourhood()
+    pass
+    # neigh = Neighbourhood()
 
-    planner = PlannerIntersection(mdp_1, neigh.N1)
-    #planner = PlannerIntersection(mdp_0, neigh.N0)
+    # planner = PlannerIntersection(mdp_1, neigh.N1)
+    # #planner = PlannerIntersection(mdp_0, neigh.N0)
+    # # arr1 = np.zeros((8, 8))
+    # # arr1[4, 3] = 1
+    # # arr2 = np.zeros((8, 8))
+    # # arr2[6, 3] = 1
     # arr1 = np.zeros((8, 8))
-    # arr1[4, 3] = 1
+    # arr1[1, 1] = 1
     # arr2 = np.zeros((8, 8))
-    # arr2[6, 3] = 1
-    arr1 = np.zeros((8, 8))
-    arr1[1, 1] = 1
-    arr2 = np.zeros((8, 8))
-    arr2[7, 7] = 1
+    # arr2[7, 7] = 1
 
-    current = arr1
-    for option in planner.bfs_plan(arr1, arr2)[1]:
-        print("state: \n", current)
-        print("OPTION INFO")
-        print(option.name)
-        print("end state")
-        current = option.execute_policy(current)
-        print(current)
-        print("start : \n", option.I)
-        print("to: \n", option.beta)
-        print("###############")
+    # current = arr1
+    # for option in planner.bfs_plan(arr1, arr2)[1]:
+    #     print("state: \n", current)
+    #     print("OPTION INFO")
+    #     print(option.name)
+    #     print("end state")
+    #     current = option.execute_policy(current)
+    #     print(current)
+    #     print("start : \n", option.I)
+    #     print("to: \n", option.beta)
+    #     print("###############")
