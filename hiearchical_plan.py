@@ -15,8 +15,8 @@ from dimension import *
 
 
 class Hierarchical_plan():
-    def __init__(self, probabilistic = False):
-        self.neighbourhood = Neighbourhood("naive", mdps)
+    def __init__(self, probabilistic = False, neighbourhood = "naive"):
+        self.neighbourhood = Neighbourhood(neighbourhood, mdps)
         self.probabilistic = probabilistic
         self.options_dicts = [{} for i in range(num_levels)]
         self.num_options = [len(mdp) for mdp in mdps]

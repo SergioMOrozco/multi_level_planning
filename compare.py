@@ -34,6 +34,8 @@ def get_plan_length(start_state,plan):
 # mdp_0 = all_options
 print(1)
 hp_planner = Hierarchical_plan()
+hp_planner_advanced = Hierarchical_plan(neighbourhood="advanced")
+
 print(2)
 def N(S):
     return S
@@ -53,12 +55,14 @@ print(3)
 
 num_test_cases = 1000
 list_hp_times = []
+list_hp_times_adv = []
 list_naive_times = []
 list_k_times = []
 list_naive_all_times = []
 
 
 list_hp_lengths= []
+list_hp_lengths_adv= []
 list_naive_lengths= []
 list_k_lengths = []
 list_naive_all_lengths = []
@@ -105,6 +109,18 @@ for i in range(num_test_cases):
     if i > 10:
         list_hp_times.append(end_time - start_time)
 
+    plan = hp_planner_advanced.hierarchical_plan_v2(arr1, arr2, num_levels - 1)
+    start_time = time.time()
+    plan = hp_planner_advanced.hierarchical_plan_v2(arr1, arr2, num_levels - 1)
+    end_time = time.time()
+    #print(end_time - start_time)
+
+    low_level_plan_length = get_plan_length_hp([start_i,start_j],plan)
+    list_hp_lengths_adv.append(low_level_plan_length)
+
+    if i > 10:
+        list_hp_times_adv.append(end_time - start_time)
+
 
 
     #find path using mnaive planner
@@ -143,8 +159,8 @@ for i in range(num_test_cases):
         list_naive_all_times.append(end_time - start_time)
     
 
-times = [np.mean(list_hp_times), np.mean(list_naive_times), np.mean(list_k_times), np.mean(list_naive_all_times)]
-times_var = np.array([np.std(list_hp_times), np.std(list_naive_times), np.std(list_k_times), np.std(list_naive_all_times)])/np.sqrt(990)
+times = [np.mean(list_hp_times), np.mean(list_hp_times_adv), np.mean(list_naive_times), np.mean(list_k_times), np.mean(list_naive_all_times)]
+times_var = np.array([np.std(list_hp_times), np.std(list_hp_times_adv), np.std(list_naive_times), np.std(list_k_times), np.std(list_naive_all_times)])/np.sqrt(990)
 # print("Average time for graph planner: ", np.mean(list_graph_times))
 # print("Average time for hierarchical planner: ", np.mean(list_hp_times))
 # print("Average time for naive planner: ", np.mean(list_naive_times))
@@ -153,14 +169,14 @@ times_var = np.array([np.std(list_hp_times), np.std(list_naive_times), np.std(li
 # print("Average length for hierarchical planner: ", np.mean(list_hp_lengths))
 # print("Average length for naive planner: ", np.mean(list_naive_lengths))
 
-lengths = [np.mean(list_hp_lengths), np.mean(list_naive_lengths), np.mean(list_k_lengths), np.mean(list_naive_all_lengths)]
-lengths_var = np.array([np.std(list_hp_lengths), np.std(list_naive_lengths), np.std(list_k_lengths), np.std(list_naive_all_lengths)])/np.sqrt(count)
+lengths = [np.mean(list_hp_lengths), np.mean(list_hp_lengths_adv), np.mean(list_naive_lengths), np.mean(list_k_lengths), np.mean(list_naive_all_lengths)]
+lengths_var = np.array([np.std(list_hp_lengths), np.std(list_hp_lengths_adv), np.std(list_naive_lengths), np.std(list_k_lengths), np.std(list_naive_all_lengths)])/np.sqrt(count)
 print(count)
 print(times)
 print(times_var)
 print(lengths)
 print(lengths_var)
-x_labels = ["Hierarchical Plan", "Base options", "Konidaris (2015)", "All options"]
+x_labels = ["Hierarchical Plan (naive)", "Hierarchical Plan (advanced)", "Base options", "Konidaris (2015)", "All options"]
 x = np.arange(len(x_labels))  
 width = 0.5  
 fig, ax = plt.subplots()
@@ -170,7 +186,7 @@ rects1 = ax.bar(x , times, width, color='salmon',  yerr=times_var)
 
 ax.set_ylabel('Time (s)')
 ax.set_xlabel('Algorithm Used')
-ax.set_title('Comparison of planning time for different algorithms (long tasks)')
+ax.set_title('Comparison of planning time for different algorithms')
 ax.set_xticks(x)
 ax.set_xticklabels(x_labels)
 
@@ -183,7 +199,7 @@ rects1 = ax.bar(x , lengths, width, color='salmon',  yerr=lengths_var)
 
 ax.set_ylabel('Time (s)')
 ax.set_xlabel('Algorithm Used')
-ax.set_title('Comparison of plan length for different algorithms (long tasks)')
+ax.set_title('Comparison of plan length for different algorithms')
 ax.set_xticks(x)
 ax.set_xticklabels(x_labels)
 

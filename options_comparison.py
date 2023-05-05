@@ -42,6 +42,7 @@ def get_plan_length(start_state,plan):
 # mdp_0 = all_options
 print(1)
 hp_planner = Hierarchical_plan()
+hp_planner_adv = Hierarchical_plan(neighbourhood="advanced")
 print(2)
 def N(S):
     return S
@@ -59,6 +60,7 @@ print(3)
 
 num_test_cases = 1000
 hp_count = [0, 0, 0, 0]
+hp_count_adv = [0, 0, 0, 0]
 k_count = [0, 0, 0, 0]
 
 count = 0
@@ -100,7 +102,13 @@ for i in range(num_test_cases):
     #print(end_time - start_time)
     
 
-    
+    plan = hp_planner_adv.hierarchical_plan_v2(arr1, arr2, num_levels - 1)
+    start_time = time.time()
+    plan = hp_planner_adv.hierarchical_plan_v2(arr1, arr2, num_levels - 1)
+    end_time = time.time()
+    plan = flatten_list(plan[1])
+    for option in plan:
+        hp_count_adv[option.lvl] += 1
     
     start_time = time.time()
     plan = plan = Kb.plan(arr1, arr2)
@@ -112,24 +120,27 @@ for i in range(num_test_cases):
 
     
 hp_count = (np.array(hp_count)/np.sum(hp_count)) * 100
+hp_count_adv = (np.array(hp_count_adv)/np.sum(hp_count_adv)) * 100
 k_count = (np.array(k_count)/np.sum(k_count)) * 100
 
 
 print(hp_count)
+print(hp_count_adv)
 print(k_count)
 
 x_labels = [0, 1, 2, 3]
 x = np.arange(4)  
-width = 0.4  
+width = 0.3  
 
 fig, ax = plt.subplots()
-rects1 = ax.bar(x - width/2, hp_count, width, color='salmon', label='Hierarchical Planner')
-rects2 = ax.bar(x + width/2, k_count, width, color='slateblue', label='Konidaris (2015)')
+rects1 = ax.bar(x - width, hp_count, width, color='salmon', label='Hierarchical Planner (naive)')
+rects1 = ax.bar(x, hp_count_adv, width, color='green', label='Hierarchical Planner (advanced)')
+rects2 = ax.bar(x + width, k_count, width, color='slateblue', label='Konidaris (2015)')
 
 
 ax.set_ylabel('Percentage of actions belonging to given level of abstraction')
 ax.set_xlabel('Level of abstration')
-ax.set_title('Distribution of actions chosen in planning by Hierarchical Planner vs Konidaris (2015)')
+ax.set_title('Distribution of actions chosen in planning by Hierarchical Planner (naive/advanced) vs Konidaris (2015)')
 ax.set_xticks(x)
 ax.set_xticklabels(x_labels)
 ax.legend()
