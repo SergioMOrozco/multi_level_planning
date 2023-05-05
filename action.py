@@ -11,6 +11,7 @@ class Action():
         self._setIBetaPi(position, direction)
         self.initiation_as_list = matrix_to_list(self.I)
         self.termination_as_list = matrix_to_list(self.beta)
+        self.lvl = 0
 
     def __copy__(self):
         return type(self)(self.position,self.direction)

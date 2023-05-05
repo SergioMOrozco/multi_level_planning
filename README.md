@@ -14,3 +14,5 @@ compare - done
 utils - done
 neighbourhood - basic implementation done
 IS PLAN EFFECTIVE COMMENTED OUT FOR TIME BEING
+
+if you partitioned options based on the subgoasl condition on thst level, thingsd wouldf be much fastwer!

@@ -15,7 +15,7 @@ def union(A, B): #take the union of two sets of states
 def to_tuple(S):
     return tuple(map(tuple, S))
 
-def partition_mdp(mdp): #split the option to obey the subgoal condidion, i.e. all state in initiation state should map to same termination state
+def partition_mdp(mdp, lvl): #split the option to obey the subgoal condidion, i.e. all state in initiation state should map to same termination state
     new_mdp = []
     for option in mdp:
         # print(option.name)
@@ -37,7 +37,7 @@ def partition_mdp(mdp): #split the option to obey the subgoal condidion, i.e. al
 
         i = 0
         for term_state in termination_to_initiation:
-            o = Option(option.name, termination_to_initiation[term_state], np.array(term_state), option.pi)
+            o = Option(option.name, termination_to_initiation[term_state], np.array(term_state), option.pi, lvl = lvl)
             o.name = option.name + "_" + str(i)
             new_mdp.append(o)
             i +=1
@@ -179,8 +179,11 @@ for i in range(dim):
 mdp_0 = mdp_0_placeholder
 mdps = make_hierarchy(dim)
 for i in range(1, len(mdps)):
-    mdps[i] = partition_mdp(mdps[i])
+    mdps[i] = partition_mdp(mdps[i], i)
 mdps[0] = mdp_0
+all_options = []
+for mdp in mdps:
+    all_options += mdp
 # mdp_2 = mdps[2]
 # mdp_1 = mdps[1]
 # # mdp_1 = make_mdp_1()

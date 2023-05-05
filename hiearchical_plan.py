@@ -19,6 +19,7 @@ class Hierarchical_plan():
         self.neighbourhood = Neighbourhood("naive", mdps)
         self.probabilistic = probabilistic
         self.options_dicts = [{} for i in range(num_levels)]
+        self.num_options = [len(mdp) for mdp in mdps]
         for i in range(num_levels):
             for option in mdps[i]:
                 self.options_dicts[i][option.name] = option
@@ -143,10 +144,10 @@ class Hierarchical_plan():
 
         # TO-DO: ADD IS PLAN EFFECTIVE
         # if i != 0:
-        #     num_options = self.num_options(i - 1)
-        #     neighbourhood_sz = self.neighbourhood_sz(i)
-        #     option_sz = self.option_sz(i - 1)
-        #     IPE = IsPlanEffective(option_sz, num_options, neighbourhood_sz, overlap, 0.5)
+        #     num_options = self.num_options[i - 1]
+        #     # neighbourhood_sz = self.neighbourhood_sz(i)
+        #     # option_sz = self.option_sz(i - 1)
+        #     IPE = IsPlanEffective(1, num_options, 2, overlap, 0.5) #HARD CODING STUFF FOR INTUITION
         #     if not IPE.is_plan_effective(num_gaps, S, G):
         #         print("PLAN IS NOT EFFECTIVE, DROPPING TO LOWER LEVEL")
         #         return self.hierarchical_plan_v2(S, G, i-1)

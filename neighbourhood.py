@@ -49,6 +49,8 @@ class Neighbourhood():
         if self.type == "naive":
             return self.N_basic(S, i)
         elif self.type == "advanced":
+            if i == 0:
+                return S
             hash = S.tobytes()
             if hash in self.advanced_store[i]:
                 return self.advanced_store[i][hash]
@@ -63,7 +65,7 @@ class Neighbourhood():
 
 
 
-        if self.type == "naive":
+    # if self.type == "naive":
     #         return self.N2_basic(S)
     #     elif self.type == "advanced":
     #         hash = S.tobytes()
@@ -117,7 +119,7 @@ class Neighbourhood():
 
 if __name__ == "__main__":
     from main import mdps
-    neigh = Neighbourhood("naive", mdps)
+    neigh = Neighbourhood("advanced", mdps)
 
     # neigh = Neighbourhood("advanced", 4, 2, 1)
     arr1 = np.zeros((8, 8))
@@ -128,7 +130,7 @@ if __name__ == "__main__":
     arr2[0, 1] = 1
     # # print(arr1)
     # # print(arr2)
-    print(neigh.N_basic(arr1, 2))
+    print(neigh.N(arr1, 2))
     # # print(neigh.union(arr1, arr2))
     # # print(neigh.N1(arr1))
     # # print("NOW")

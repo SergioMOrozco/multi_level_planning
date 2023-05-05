@@ -5,7 +5,7 @@ from utils import matrix_to_list
 from dimension import dim
 
 class Option():
-    def __init__(self, option, I = None, beta = None, pi = None, ):
+    def __init__(self, option, I = None, beta = None, pi = None, lvl = 0):
         self.name = option
         # Set I (initiation set), beta (termination set), pi (policy) 
         if I is not None:
@@ -17,6 +17,7 @@ class Option():
 
         self.initiation_as_list = matrix_to_list(self.I)
         self.termination_as_list = matrix_to_list(self.beta)
+        self.lvl = lvl
 
     def __copy__(self):
         return type(self)(self.name,self.I,self.beta,self.pi)
