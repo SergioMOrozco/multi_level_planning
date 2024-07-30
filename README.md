@@ -1,2 +1,4 @@
 # multi_level_planning
-Implementation of Hierarchical-plan and test suites comparing performance to that of Konidaris (2015) and naive planning for a hierarchical grid world
+Quick planning algorithm for multi-level abstraction hierarchies
+
+Writeup: https://drive.google.com/file/d/1jqyVwGh5FPPuo7AWBwRU5m7ZF3xUjjss/view?usp=sharing
